@@ -1,3 +1,4 @@
+import functools
 import os
 import os.path
 import time
@@ -32,6 +33,17 @@ class NoIPsAvailable(RuntimeError):
     pass
 
 
+def not_found(func):
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except novaclient.exceptions.NotFound:
+            return None
+    return wrapped
+
+
+
 class CloudAPI(object):
     def __init__(self):
         self._client = None
@@ -50,12 +62,11 @@ class CloudAPI(object):
 
         return self._client
 
+    @not_found
     def find_server(self, name):
-        try:
-            return self.client.servers.find(name=name)
-        except novaclient.exceptions.NotFound:
-            return None
+        return self.client.servers.find(name=name)
 
+    @not_found
     def get_server(self, server_id):
         return self.client.servers.get(server_id)
 
@@ -78,12 +89,18 @@ class CloudAPI(object):
     def assign_ip(self, server, ip):
         server.add_floating_ip(ip)
 
+    @not_found
     def find_image(self, name):
-        try:
-            return self.client.images.find(name=name)
-        except novaclient.exceptions.NotFound:
-            return None
+        return self.client.images.find(name=name)
 
+    @not_found
+    def get_image(self, image_id):
+        return self.client.images.get(image_id)
+
+    def snapshot(self, server, name):
+        return self.client.servers.create_image(server, name)
+
+    @not_found
     def find_flavor(self, name):
         return self.client.flavors.find(name=name)
 
@@ -103,11 +120,9 @@ class CloudAPI(object):
         return self.client.security_group_rules.create(
                 security_group.id, *rule)
 
+    @not_found
     def find_keypair(self, name):
-        try:
-            return self.client.keypairs.find(name=name)
-        except novaclient.exceptions.NotFound:
-            return None
+        return self.client.keypairs.find(name=name)
 
     def create_keypair(self, name, key_data):
         return self.client.keypairs.create(name, public_key=key_data)
@@ -185,6 +200,12 @@ class Environment(object):
     def ip(self):
         return self.cloud_api.find_ip(self.server.id)
 
+    def snapshot(self, name):
+        if not self.server:
+            print 'Environment has not been created.'
+        else:
+            self.cloud_api.snapshot(self.server, name)
+            print 'Created snapshot: %s.' % name
 
 
 def provision(env=DEFAULT_ENV_NAME):
@@ -220,24 +241,9 @@ def up(env=DEFAULT_ENV_NAME):
         print 'Environment has no IP.'
 
 
-def backup(env=DEFAULT_ENV_NAME, image_name=None):
-    client = _get_nova_client()
-    server = _find_server(client, env)
-    if not server:
-        print 'Environment not found.'
-    else:
-        print 'Triggering image creation.'
-        image_name = image_name or ('%s-backup' % env)
-        image_id = server.create_image(image_name)
-        # Wait for image to become available
-        for i in xrange(60):
-            image = client.images.get(image_id)
-            if image.status == 'ACTIVE':
-                break
-            if i == 59:
-                raise SnapshotFailure()
-
-        print 'Created environment snapshot: %s.' % image_name
+def snapshot(env=DEFAULT_ENV_NAME, name=None):
+    env = Environment(env)
+    env.snapshot(name or ('%s-snapshot' % env.name))
 
 
 def ip(env=DEFAULT_ENV_NAME):
