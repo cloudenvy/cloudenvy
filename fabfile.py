@@ -3,142 +3,246 @@ import os.path
 import time
 
 import fabric.api
+import fabric.operations
 import novaclient.exceptions
 import novaclient.client
 
 
-fabric.api.env.user = os.environ.get('CE_USER', 'ubuntu')
-fabric.api.env.hosts = [os.environ.get('CE_HOST')]
+remote_user = os.environ.get('CE_USER', 'ubuntu')
+fabric.api.env.user = remote_user
 DEFAULT_ENV_NAME = 'cloudenvy'
 userdata_location = os.environ.get('CE_USERDATA_LOCATION', './userdata')
-sec_group_name = os.environ.get('CE_SEC_GROUP_NAME', 'cloudenvy')
-keypair_name = os.environ.get('CE_KEY_NAME', 'cloudenvy')
-pubkey_location = os.environ.get('CE_KEY_LOCATION',
-                                 os.path.expanduser('~/.ssh/id_rsa.pub'))
 
 
+
+
+class SnapshotFailure(RuntimeError):
+    pass
 
 
 class FixedIPAssignFailure(RuntimeError):
     pass
 
 
-class NoFloatingIPsAvailable(RuntimeError):
+class NoIPsAvailable(RuntimeError):
     pass
 
 
-def _get_nova_client():
-    """create a new nova client"""
-    user = os.environ.get('OS_USERNAME')
-    password = os.environ.get('OS_PASSWORD')
-    tenant = os.environ.get('OS_TENANT_NAME')
-    auth_url = os.environ.get('OS_AUTH_URL')
-    return novaclient.client.Client('2', user, password, tenant, auth_url,
-                                    service_type='compute')
+class CloudAPI(object):
+    def __init__(self):
+        self._client = None
+
+    @property
+    def client(self):
+        if not self._client:
+            self._client = novaclient.client.Client(
+                    '2',
+                    os.environ.get('OS_USERNAME'),
+                    os.environ.get('OS_PASSWORD'),
+                    os.environ.get('OS_TENANT_NAME'),
+                    os.environ.get('OS_AUTH_URL'),
+                    service_type='compute',
+            )
+
+        return self._client
+
+    def find_server(self, name):
+        try:
+            return self.client.servers.find(name=name)
+        except novaclient.exceptions.NotFound:
+            return None
+
+    def get_server(self, server_id):
+        return self.client.servers.get(server_id)
+
+    def create_server(self, *args, **kwargs):
+        return self.client.servers.create(*args, **kwargs)
+
+    def find_free_ip(self):
+        fips = self.client.floating_ips.list()
+        for fip in fips:
+            if not fip.instance_id:
+                return fip.ip
+        raise NoIPsAvailable()
+
+    def find_ip(self, server_id):
+        fips = self.client.floating_ips.list()
+        for fip in fips:
+            if fip.instance_id == server_id:
+                return fip.ip
+
+    def assign_ip(self, server, ip):
+        server.add_floating_ip(ip)
+
+    def find_image(self, name):
+        return self.client.images.find(name=name)
+
+    def find_flavor(self, name):
+        return self.client.flavors.find(name=name)
+
+    def find_security_group(self, name):
+        try:
+            return self.client.security_groups.find(name=name)
+        except novaclient.exceptions.NotFound:
+            return None
+
+    def create_security_group(self, name):
+        try:
+            return self.client.security_groups.create(name=name)
+        except novaclient.exceptions.NotFound:
+            return None
+
+    def create_security_group_rule(self, security_group, rule):
+        return self.client.security_group_rules.create(
+                security_group.id, *rule)
+
+    def find_keypair(self, name):
+        try:
+            return self.client.keypairs.find(name=name)
+        except novaclient.exceptions.NotFound:
+            return None
+
+    def create_keypair(self, name, key_data):
+        return self.cloud_api.create_keypair(name, public_key=key_data)
 
 
-def _get_floating_ip(client, server):
-    fips = client.floating_ips.list()
+class Environment(object):
+    def __init__(self, name):
+        self.name = name
+        self.cloud_api = CloudAPI()
+        self._server = None
+        self._ip = None
 
-    # Iterate once to check for existing assignment
-    for fip in fips:
-        if fip.instance_id == server.id:
-            return fip
+    @property
+    def server(self):
+        return self.cloud_api.find_server(self.name)
 
-    # Now try to assign an IP
-    for fip in fips:
-        if not fip.instance_id:
-            server.add_floating_ip(fip.ip)
-            return fip
-
-    raise NoFloatingIPsAvailable()
-
-
-def _ensure_keypair_exists(client):
-    try:
-        client.keypairs.find(name=keypair_name)
-    except novaclient.exceptions.NotFound:
-        fap = open(pubkey_location, 'r')
-        data = fap.read()
-        fap.close()
-        client.keypairs.create(keypair_name, public_key=data)
-
-
-def _ensure_sec_group_exists(client):
-    try:
-        sec_group = client.security_groups.find(name=sec_group_name)
-    except novaclient.exceptions.NotFound:
-        sec_group = client.security_groups.create(sec_group_name,
-                                                  sec_group_name)
-        pg_id = sec_group.id
-        client.security_group_rules.create(pg_id,
-                'icmp', -1, -1, '0.0.0.0/0')
-        client.security_group_rules.create(pg_id,
-                'tcp', 22, 22, '0.0.0.0/0')
-        client.security_group_rules.create(pg_id,
-                'tcp', 8080, 8080, '0.0.0.0/0')
-
-
-def _find_server(client, env_name):
-    try:
-        return client.servers.find(name=env_name)
-    except novaclient.exceptions.NotFound:
-        return None
-
-
-def _read_userdata():
-    fap = open(userdata_location, 'r')
-    data = fap.read()
-    fap.close()
-    return data
-
-
-def _get_server(client, env_name):
-    server = _find_server(client, env_name)
-    if not server:
+    def build_server(self):
         image_name = os.environ.get('CE_IMAGE_NAME',
                                     'precise-server-cloudimg-amd64')
-        image = client.images.find(name=image_name)
+        image = self.cloud_api.find_image(image_name)
+
         flavor_name = os.environ.get('CE_FLAVOR_NAME', 'm1.large')
-        flavor = client.flavors.find(name=flavor_name)
+        flavor = self.cloud_api.find_flavor(flavor_name)
 
-        _ensure_sec_group_exists(client)
-        _ensure_keypair_exists(client)
+        sec_group_name = os.environ.get('CE_SEC_GROUP_NAME', 'cloudenvy')
+        self._ensure_sec_group_exists(sec_group_name)
 
-        server = client.servers.create(env_name,
-                                       image,
-                                       flavor,
-                                       userdata=_read_userdata(),
-                                       key_name=keypair_name,
-                                       security_groups=[sec_group_name])
+        keypair_name = os.environ.get('CE_KEY_NAME', 'cloudenvy')
+        self._ensure_keypair_exists(keypair_name)
+
+        build_kwargs = {
+            'name': self.name,
+            'image': image,
+            'flavor': flavor,
+            'key_name': keypair_name,
+            'security_groups': [sec_group_name],
+        }
+        server = self.cloud_api.create_server(**build_kwargs)
 
         # Wait for server to get fixed ip
         for i in xrange(60):
-            server = client.servers.get(server.id)
+            server = self.cloud_api.get_server(server.id)
             if len(server.networks):
-                return server
+                break
             if i == 59:
                 raise FixedIPAssignFailure()
 
-    return server
+        ip = self.cloud_api.find_free_ip()
+        self.cloud_api.assign_ip(server, ip)
+
+    def _ensure_sec_group_exists(self, name):
+        if not self.cloud_api.find_security_group(name):
+            sec_group = self.cloud_api.create_security_group(name)
+
+            rules = [
+                ('icmp', -1, -1, '0.0.0.0/0'),
+                ('tcp', 22, 22, '0.0.0.0/0'),
+                ('tcp', 8080, 8080, '0.0.0.0/0'),
+            ]
+            for rule in rules:
+                self.cloud_api.create_security_group_rule(sec_group, rule)
+
+    def _ensure_keypair_exists(self, name):
+        if not self.cloud_api.find_keypair(name):
+            pubkey_location = os.environ.get('CE_KEY_LOCATION',
+                    os.path.expanduser('~/.ssh/id_rsa.pub'))
+            fap = open(pubkey_location, 'r')
+            data = fap.read()
+            fap.close()
+            self.cloud_api.create_keypair(name, public_key=data)
+
+    @property
+    def ip(self):
+        return self.cloud_api.find_ip(self.server.id)
 
 
-def up(name=DEFAULT_ENV_NAME):
-    """create the cloud environment if it doesn't exist"""
+
+def provision(env=DEFAULT_ENV_NAME):
+    env = Environment(env)
+    print 'Provisioning environment.'
+    with fabric.api.settings(host_string=env.ip):
+        for i in range(10):
+            try:
+                fabric.operations.put(userdata_location, '~', mode=0755)
+                break
+            except fabric.exceptions.NetworkError:
+                time.sleep(1)
+                pass
+
+        fabric.operations.run(userdata_location)
+
+
+def up(env=DEFAULT_ENV_NAME):
+    env = Environment(env)
+    if not env.server:
+        print 'Building environment.'
+        env.build_server()
+    print 'Environment IP: %s' % env.ip
+
+
+def backup(env=DEFAULT_ENV_NAME, image_name=None):
     client = _get_nova_client()
-    server = _get_server(client, name)
-    fip = _get_floating_ip(client, server)
-    print 'Environment IP: %s' % fip.ip
+    server = _find_server(client, env)
+    if not server:
+        print 'Environment not found.'
+    else:
+        print 'Triggering image creation.'
+        image_name = image_name or ('%s-backup' % env)
+        image_id = server.create_image(image_name)
+        # Wait for image to become available
+        for i in xrange(60):
+            image = client.images.get(image_id)
+            if image.status == 'ACTIVE':
+                break
+            if i == 59:
+                raise SnapshotFailure()
+
+        print 'Created environment snapshot: %s.' % image_name
 
 
-def destroy(name=DEFAULT_ENV_NAME):
-    """Destroy an existing server"""
-    client = _get_nova_client()
-    server = _find_server(client, name)
-    if server:
-        server.delete()
-        print "Triggering environment deletion."
-        while _find_server(client, name):
+def ip(env=DEFAULT_ENV_NAME):
+    env = Environment(env)
+    if env.ip:
+        print 'Environment IP: %s' % env.ip
+    else:
+        print 'Could not find IP.'
+
+
+def ssh(env=DEFAULT_ENV_NAME):
+    env = Environment(env)
+    if env.ip:
+        fabric.operations.local('ssh %s@%s' % (remote_user, env.ip))
+    else:
+        print 'Could not find IP.'
+
+
+def destroy(env=DEFAULT_ENV_NAME):
+    env = Environment(env)
+    print 'Triggering environment deletion.'
+    if env.server:
+        env.server.delete()
+        while env.server:
             time.sleep(1)
     else:
-        print "No environment found."
+        print 'No environment exists.'
