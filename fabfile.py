@@ -16,6 +16,10 @@ userdata_location = os.environ.get('CE_USERDATA_LOCATION', './userdata')
 
 
 
+class ImageNotFound(RuntimeError):
+    pass
+
+
 class SnapshotFailure(RuntimeError):
     pass
 
@@ -75,7 +79,10 @@ class CloudAPI(object):
         server.add_floating_ip(ip)
 
     def find_image(self, name):
-        return self.client.images.find(name=name)
+        try:
+            return self.client.images.find(name=name)
+        except novaclient.exceptions.NotFound:
+            return None
 
     def find_flavor(self, name):
         return self.client.flavors.find(name=name)
@@ -88,7 +95,7 @@ class CloudAPI(object):
 
     def create_security_group(self, name):
         try:
-            return self.client.security_groups.create(name=name)
+            return self.client.security_groups.create(name, name)
         except novaclient.exceptions.NotFound:
             return None
 
@@ -103,7 +110,7 @@ class CloudAPI(object):
             return None
 
     def create_keypair(self, name, key_data):
-        return self.cloud_api.create_keypair(name, public_key=key_data)
+        return self.client.keypairs.create(name, public_key=key_data)
 
 
 class Environment(object):
@@ -121,6 +128,8 @@ class Environment(object):
         image_name = os.environ.get('CE_IMAGE_NAME',
                                     'precise-server-cloudimg-amd64')
         image = self.cloud_api.find_image(image_name)
+        if not image:
+            raise ImageNotFound()
 
         flavor_name = os.environ.get('CE_FLAVOR_NAME', 'm1.large')
         flavor = self.cloud_api.find_flavor(flavor_name)
@@ -170,7 +179,7 @@ class Environment(object):
             fap = open(pubkey_location, 'r')
             data = fap.read()
             fap.close()
-            self.cloud_api.create_keypair(name, public_key=data)
+            self.cloud_api.create_keypair(name, data)
 
     @property
     def ip(self):
@@ -197,8 +206,18 @@ def up(env=DEFAULT_ENV_NAME):
     env = Environment(env)
     if not env.server:
         print 'Building environment.'
-        env.build_server()
-    print 'Environment IP: %s' % env.ip
+        try:
+            env.build_server()
+        except ImageNotFound:
+            print 'Could not find image.'
+            return
+        except NoIPsAvailable:
+            print 'Could not find free IP.'
+            return
+    if env.ip:
+        print 'Environment IP: %s.' % env.ip
+    else:
+        print 'Environment has no IP.'
 
 
 def backup(env=DEFAULT_ENV_NAME, image_name=None):
@@ -223,7 +242,9 @@ def backup(env=DEFAULT_ENV_NAME, image_name=None):
 
 def ip(env=DEFAULT_ENV_NAME):
     env = Environment(env)
-    if env.ip:
+    if not env.server:
+        print 'Environment has not been created'
+    elif env.ip:
         print 'Environment IP: %s' % env.ip
     else:
         print 'Could not find IP.'
