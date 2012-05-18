@@ -23,7 +23,7 @@ account!)
     export OS_USERNAME=brosefstalin
     export OS_PASSWORD=iliketurtles
 
-Setup and launch a bare instance.
+Set up and launch a bare instance.
 
     fab up  
 
