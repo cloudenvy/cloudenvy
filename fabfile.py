@@ -120,6 +120,9 @@ class CloudAPI(object):
         return self.client.security_group_rules.create(
                 security_group.id, *rule)
 
+    def allocate_floating_ip(self):
+        return self.client.floating_ips.create()
+
     @not_found
     def find_keypair(self, name):
         return self.client.keypairs.find(name=name)
@@ -171,8 +174,12 @@ class Environment(object):
                 break
             if i == 59:
                 raise FixedIPAssignFailure()
+        try:
+            ip = self.cloud_api.find_free_ip()
+        except NoIPsAvailable:
+            self.cloud_api.allocate_floating_ip()
+            ip = self.cloud_api.find_free_ip()
 
-        ip = self.cloud_api.find_free_ip()
         self.cloud_api.assign_ip(server, ip)
 
     def _ensure_sec_group_exists(self, name):
