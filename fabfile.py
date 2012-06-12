@@ -1,3 +1,4 @@
+import ConfigParser
 import functools
 import os
 import os.path
@@ -9,10 +10,17 @@ import novaclient.exceptions
 import novaclient.client
 
 
-remote_user = os.environ.get('CE_USER', 'ubuntu')
-fabric.api.env.user = remote_user
+
+def _get_config():
+    config_file_location = os.environ.get('CLOUDENVY_CONFIG',
+                                          os.path.expanduser('~/.cloudenvy'))
+    config = ConfigParser.ConfigParser()
+    config.read(config_file_location)
+    return config
+
+
+SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', 'default')
 DEFAULT_ENV_NAME = 'cloudenvy'
-userdata_location = os.environ.get('CE_USERDATA_LOCATION', './userdata')
 
 
 
@@ -45,21 +53,28 @@ def not_found(func):
 
 
 class CloudAPI(object):
-    def __init__(self):
+    def __init__(self, config):
         self._client = None
+        self.config = config
+        self.user = self.config.get(SERVICE_NAME, 'OS_USERNAME')
+        self.password = self.config.get(SERVICE_NAME, 'OS_PASSWORD')
+        self.tenant_name = self.config.get(SERVICE_NAME, 'OS_TENANT_NAME')
+        self.auth_url = self.config.get(SERVICE_NAME, 'OS_AUTH_URL')
+        self.service_name = self.config.get(SERVICE_NAME, 'OS_SERVICE_NAME')
+        self.region_name = self.config.get(SERVICE_NAME, 'OS_REGION_NAME')
 
     @property
     def client(self):
         if not self._client:
             self._client = novaclient.client.Client(
                     '2',
-                    os.environ.get('OS_USERNAME'),
-                    os.environ.get('OS_PASSWORD'),
-                    os.environ.get('OS_TENANT_NAME'),
-                    os.environ.get('OS_AUTH_URL'),
-                    service_type='compute',
+                    self.user,
+                    self.password,
+                    self.tenant_name,
+                    self.auth_url,
+             #       service_name=self.service_name,
+             #       region_name=self.region_name,
             )
-
         return self._client
 
     @not_found
@@ -132,9 +147,15 @@ class CloudAPI(object):
 
 
 class Environment(object):
-    def __init__(self, name):
+    def __init__(self, name, config):
         self.name = name
-        self.cloud_api = CloudAPI()
+        self.config = config
+        self.cloud_api = CloudAPI(self.config)
+        self.image_name = config.get(SERVICE_NAME, 'image_name')
+        self.flavor_name = config.get(SERVICE_NAME, 'flavor_name')
+        self.sec_group_name = config.get(SERVICE_NAME, 'sec_group_name')
+        self.keypair_name = config.get(SERVICE_NAME, 'keypair_name')
+        self.keypair_location = config.get(SERVICE_NAME, 'keypair_location')
         self._server = None
         self._ip = None
 
@@ -143,27 +164,20 @@ class Environment(object):
         return self.cloud_api.find_server(self.name)
 
     def build_server(self):
-        image_name = os.environ.get('CE_IMAGE_NAME',
-                                    'precise-server-cloudimg-amd64')
-        image = self.cloud_api.find_image(image_name)
+        image = self.cloud_api.find_image(self.image_name)
         if not image:
             raise ImageNotFound()
 
-        flavor_name = os.environ.get('CE_FLAVOR_NAME', 'm1.large')
-        flavor = self.cloud_api.find_flavor(flavor_name)
-
-        sec_group_name = os.environ.get('CE_SEC_GROUP_NAME', 'cloudenvy')
-        self._ensure_sec_group_exists(sec_group_name)
-
-        keypair_name = os.environ.get('CE_KEY_NAME', 'cloudenvy')
-        self._ensure_keypair_exists(keypair_name)
+        flavor = self.cloud_api.find_flavor(self.flavor_name)
+        self._ensure_sec_group_exists(self.sec_group_name)
+        self._ensure_keypair_exists(self.keypair_name, self.keypair_location)
 
         build_kwargs = {
             'name': self.name,
             'image': image,
             'flavor': flavor,
-            'key_name': keypair_name,
-            'security_groups': [sec_group_name],
+            'key_name': self.keypair_name,
+            'security_groups': [self.sec_group_name],
         }
         server = self.cloud_api.create_server(**build_kwargs)
 
@@ -192,14 +206,14 @@ class Environment(object):
                 ('tcp', 443, 443, '0.0.0.0/0'),
                 ('tcp', 80, 80, '0.0.0.0/0'),
                 ('tcp', 8080, 8080, '0.0.0.0/0'),
+                ('tcp', 5000, 5000, '0.0.0.0/0'),
+                ('tcp', 9292, 9292, '0.0.0.0/0'),
             ]
             for rule in rules:
                 self.cloud_api.create_security_group_rule(sec_group, rule)
 
-    def _ensure_keypair_exists(self, name):
+    def _ensure_keypair_exists(self, name, pubkey_location):
         if not self.cloud_api.find_keypair(name):
-            pubkey_location = os.environ.get('CE_KEY_LOCATION',
-                    os.path.expanduser('~/.ssh/id_rsa.pub'))
             fap = open(pubkey_location, 'r')
             data = fap.read()
             fap.close()
@@ -218,9 +232,11 @@ class Environment(object):
 
 
 def provision(env=DEFAULT_ENV_NAME):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     print 'Provisioning environment.'
-    with fabric.api.settings(host_string=env.ip):
+    remote_user = 'ubuntu'
+    userdata_location = os.environ.get('CE_USERDATA_LOCATION', './userdata')
+    with fabric.api.settings(host_string=env.ip, user=remote_user):
         for i in range(10):
             try:
                 fabric.operations.put(userdata_location, '~', mode=0755)
@@ -233,7 +249,7 @@ def provision(env=DEFAULT_ENV_NAME):
 
 
 def up(env=DEFAULT_ENV_NAME):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     if not env.server:
         print 'Building environment.'
         try:
@@ -251,12 +267,12 @@ def up(env=DEFAULT_ENV_NAME):
 
 
 def snapshot(env=DEFAULT_ENV_NAME, name=None):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     env.snapshot(name or ('%s-snapshot' % env.name))
 
 
 def ip(env=DEFAULT_ENV_NAME):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     if not env.server:
         print 'Environment has not been created'
     elif env.ip:
@@ -266,15 +282,16 @@ def ip(env=DEFAULT_ENV_NAME):
 
 
 def ssh(env=DEFAULT_ENV_NAME):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     if env.ip:
+        remote_user = 'ubuntu'
         fabric.operations.local('ssh %s@%s' % (remote_user, env.ip))
     else:
         print 'Could not find IP.'
 
 
 def destroy(env=DEFAULT_ENV_NAME):
-    env = Environment(env)
+    env = Environment(env, _get_config())
     print 'Triggering environment deletion.'
     if env.server:
         env.server.delete()
