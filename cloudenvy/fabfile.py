@@ -10,19 +10,27 @@ import novaclient.exceptions
 import novaclient.client
 
 
+CONFIG_DEFAULTS = {
+    'os_service_name': None,
+    'os_region_name': None,
+    'os_password': None,
+    'assign_floating_ip': False,
+    'keypair_name': None,
+    'keypair_location': None,
+    'sec_group_name': None,
+}
+
 
 def _get_config():
     config_file_location = os.environ.get('CLOUDENVY_CONFIG',
                                           os.path.expanduser('~/.cloudenvy'))
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser.ConfigParser(CONFIG_DEFAULTS)
     config.read(config_file_location)
     return config
 
 
 SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', 'default')
 DEFAULT_ENV_NAME = 'cloudenvy'
-
-
 
 
 class ImageNotFound(RuntimeError):
@@ -72,8 +80,8 @@ class CloudAPI(object):
                     self.password,
                     self.tenant_name,
                     self.auth_url,
-             #       service_name=self.service_name,
-             #       region_name=self.region_name,
+                    service_name=self.service_name,
+                    region_name=self.region_name,
             )
         return self._client
 
@@ -153,6 +161,7 @@ class Environment(object):
         self.cloud_api = CloudAPI(self.config)
         self.image_name = config.get(SERVICE_NAME, 'image_name')
         self.flavor_name = config.get(SERVICE_NAME, 'flavor_name')
+        self.assign_floating_ip = config.get(SERVICE_NAME, 'assign_floating_ip')
         self.sec_group_name = config.get(SERVICE_NAME, 'sec_group_name')
         self.keypair_name = config.get(SERVICE_NAME, 'keypair_name')
         self.keypair_location = config.get(SERVICE_NAME, 'keypair_location')
@@ -169,16 +178,21 @@ class Environment(object):
             raise ImageNotFound()
 
         flavor = self.cloud_api.find_flavor(self.flavor_name)
-        self._ensure_sec_group_exists(self.sec_group_name)
-        self._ensure_keypair_exists(self.keypair_name, self.keypair_location)
 
         build_kwargs = {
             'name': self.name,
             'image': image,
             'flavor': flavor,
-            'key_name': self.keypair_name,
-            'security_groups': [self.sec_group_name],
         }
+
+        if self.sec_group_name is not None:
+            self._ensure_sec_group_exists(self.sec_group_name)
+            build_kwargs['security_groups'] = [self.sec_group_name]
+
+        if self.keypair_name is not None:
+            self._ensure_keypair_exists(self.keypair_name, self.keypair_location)
+            build_kwargs['key_name'] = self.keypair_name
+
         server = self.cloud_api.create_server(**build_kwargs)
 
         # Wait for server to get fixed ip
@@ -188,13 +202,15 @@ class Environment(object):
                 break
             if i == 59:
                 raise FixedIPAssignFailure()
-        try:
-            ip = self.cloud_api.find_free_ip()
-        except NoIPsAvailable:
-            self.cloud_api.allocate_floating_ip()
-            ip = self.cloud_api.find_free_ip()
 
-        self.cloud_api.assign_ip(server, ip)
+        if self.assign_floating_ip:
+            try:
+                ip = self.cloud_api.find_free_ip()
+            except NoIPsAvailable:
+                self.cloud_api.allocate_floating_ip()
+                ip = self.cloud_api.find_free_ip()
+
+            self.cloud_api.assign_ip(server, ip)
 
     def _ensure_sec_group_exists(self, name):
         if not self.cloud_api.find_security_group(name):
