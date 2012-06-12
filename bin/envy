@@ -1,0 +1,22 @@
+#!env python
+
+import argparse
+import sys
+
+from cloudenvy import fabfile
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Process some shiz.')
+    parser.add_argument('cmd')
+    args = parser.parse_args()
+
+    try:
+        fab_func = getattr(fabfile, args.cmd)
+    except AttributeError:
+        print 'Invalid command.'
+        sys.exit(1)
+    else:
+        fab_func()
+
+
