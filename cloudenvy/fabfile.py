@@ -251,17 +251,19 @@ def provision(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
     print 'Provisioning environment.'
     remote_user = 'ubuntu'
-    userdata_location = os.environ.get('CE_USERDATA_LOCATION', './userdata')
-    with fabric.api.settings(host_string=env.ip, user=remote_user):
+    local_userdata_loc = os.environ.get('CE_USERDATA_LOCATION',
+                                             './userdata')
+    remote_userdata_loc = '~/userdata'
+    with fabric.api.settings(host_string=env.ip, user=remote_user, forward_agent=True):
         for i in range(10):
             try:
-                fabric.operations.put(userdata_location, '~', mode=0755)
+                fabric.operations.put(local_userdata_loc,
+                        remote_userdata_loc, mode=0755)
                 break
             except fabric.exceptions.NetworkError:
                 time.sleep(1)
-                pass
 
-        fabric.operations.run(userdata_location)
+        fabric.operations.run(remote_userdata_loc)
 
 
 def up(env=DEFAULT_ENV_NAME):
