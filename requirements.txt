@@ -1,2 +1,2 @@
 fabric
--e git://github.com/openstack/python-novaclient.git#egg=python-novaclient
+python-novaclient
