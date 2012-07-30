@@ -1,5 +1,8 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
 import ConfigParser
 import functools
+import logging
 import os
 import os.path
 import time
@@ -22,14 +25,20 @@ CONFIG_DEFAULTS = {
 
 
 DEFAULT_ENV_NAME = 'cloudenvy'
-SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', 'default')
+SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', DEFAULT_ENV_NAME)
 
 
 def _get_config():
     config_file_location = os.environ.get('CLOUDENVY_CONFIG',
                                           os.path.expanduser('~/.cloudenvy'))
+    logging.info('Loading config from: %s', config_file_location)
     config = ConfigParser.ConfigParser(CONFIG_DEFAULTS)
     config.read(config_file_location)
+
+    logging.debug('Loaded config:')
+    logging.debug('[%s]', SERVICE_NAME)
+    for opt in config.options(SERVICE_NAME):
+        logging.debug('  %s = %s', opt, config.get(SERVICE_NAME, opt))
     return config
 
 
@@ -185,13 +194,17 @@ class Environment(object):
         }
 
         if self.sec_group_name is not None:
+            logging.info('Using security group: %s', self.sec_group_name)
             self._ensure_sec_group_exists(self.sec_group_name)
             build_kwargs['security_groups'] = [self.sec_group_name]
 
         if self.keypair_name is not None:
-            self._ensure_keypair_exists(self.keypair_name, self.keypair_location)
+            logging.info('Using keypair: %s', self.keypair_name)
+            self._ensure_keypair_exists(self.keypair_name,
+                                        self.keypair_location)
             build_kwargs['key_name'] = self.keypair_name
 
+        logging.info('Creating server...')
         server = self.cloud_api.create_server(**build_kwargs)
 
         # Wait for server to get fixed ip
@@ -199,20 +212,28 @@ class Environment(object):
             server = self.cloud_api.get_server(server.id)
             if len(server.networks):
                 break
+            if i % 5:
+                logging.info('...waiting for fixed ip')
             if i == 59:
                 raise FixedIPAssignFailure()
+        logging.info('...done.')
 
         if self.assign_floating_ip:
+            logging.info('Allocating a floating ip...')
             try:
                 ip = self.cloud_api.find_free_ip()
             except NoIPsAvailable:
+                logging.info('...allocating a new floating ip')
                 self.cloud_api.allocate_floating_ip()
                 ip = self.cloud_api.find_free_ip()
 
+            logging.info('...allocating %s', ip)
             self.cloud_api.assign_ip(server, ip)
+            logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
         if not self.cloud_api.find_security_group(name):
+            logging.info('No security group named %s found, creating...', name)
             sec_group = self.cloud_api.create_security_group(name)
 
             rules = [
@@ -225,14 +246,20 @@ class Environment(object):
                 ('tcp', 9292, 9292, '0.0.0.0/0'),
             ]
             for rule in rules:
+                logging.debug('... adding rule: %s', rule)
                 self.cloud_api.create_security_group_rule(sec_group, rule)
+            logging.info('...done.')
 
     def _ensure_keypair_exists(self, name, pubkey_location):
         if not self.cloud_api.find_keypair(name):
+            logging.info('No keypair named %s found, creating...', name)
+            logging.debug('...using key at %s', pubkey_location)
             fap = open(pubkey_location, 'r')
             data = fap.read()
+            logging.debug('...contents:\n%s', data)
             fap.close()
             self.cloud_api.create_keypair(name, data)
+            logging.info('...done.')
 
     @property
     def ip(self):
@@ -240,18 +267,21 @@ class Environment(object):
 
     def snapshot(self, name):
         if not self.server:
-            print 'Environment has not been created.'
+            logging.error('Environment has not been created.\n'
+                          'Try running `envy up` first?')
         else:
+            logging.info('Creating snapshot %s...', name)
             self.cloud_api.snapshot(self.server, name)
-            print 'Created snapshot: %s.' % name
+            logging.info('...done.')
+            print name
 
 
 def provision(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
-    print 'Provisioning environment.'
+    logging.INFO('Provisioning environment.')
     remote_user = 'ubuntu'
-    local_userdata_loc = os.environ.get('CE_USERDATA_LOCATION',
-                                             './userdata')
+    local_userdata_loc = os.environ.get('CLOUDENVY_USERDATA_LOCATION',
+                                        './userdata')
     remote_userdata_loc = '~/userdata'
     with fabric.api.settings(host_string=env.ip,
                              user=remote_user,
@@ -259,7 +289,8 @@ def provision(env=DEFAULT_ENV_NAME):
         for i in range(10):
             try:
                 fabric.operations.put(local_userdata_loc,
-                        remote_userdata_loc, mode=0755)
+                                      remote_userdata_loc,
+                                      mode=0755)
                 break
             except fabric.exceptions.NetworkError:
                 time.sleep(1)
@@ -270,17 +301,17 @@ def provision(env=DEFAULT_ENV_NAME):
 def up(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
     if not env.server:
-        print 'Building environment.'
+        logging.info('Building environment.')
         try:
             env.build_server()
         except ImageNotFound:
-            print 'Could not find image.'
+            logging.error('Could not find image.')
             return
         except NoIPsAvailable:
-            print 'Could not find free IP.'
+            logging.error('Could not find free IP.')
             return
     if env.ip:
-        print 'Environment IP: %s.' % env.ip
+        print env.ip
     else:
         print 'Environment has no IP.'
 
@@ -293,11 +324,12 @@ def snapshot(env=DEFAULT_ENV_NAME, name=None):
 def ip(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
     if not env.server:
-        print 'Environment has not been created'
+        logging.error('Environment has not been created.\n'
+                      'Try running `envy up` first?')
     elif env.ip:
-        print 'Environment IP: %s' % env.ip
+        print env.ip
     else:
-        print 'Could not find IP.'
+        logging.error('Could not find IP.')
 
 
 def ssh(env=DEFAULT_ENV_NAME):
@@ -306,15 +338,15 @@ def ssh(env=DEFAULT_ENV_NAME):
         remote_user = 'ubuntu'
         fabric.operations.local('ssh %s@%s' % (remote_user, env.ip))
     else:
-        print 'Could not find IP.'
+        logging.error('Could not find IP.')
 
 
 def destroy(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
-    print 'Triggering environment deletion.'
+    logging.info('Triggering environment deletion.')
     if env.server:
         env.server.delete()
         while env.server:
             time.sleep(1)
     else:
-        print 'No environment exists.'
+        logging.error('No environment exists.')
