@@ -12,7 +12,11 @@ config = dict(
     author_email='bcwaldon@gmail.com',
     install_requires=['fabric', 'python-novaclient'],
     packages=['cloudenvy'],
-    scripts=['bin/envy'],
+    entry_points={
+        'console_scripts': [
+            'envy = cloudenvy.main:main',
+        ]
+    },
 )
 
 setup(**config)
