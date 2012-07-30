@@ -21,16 +21,16 @@ CONFIG_DEFAULTS = {
 }
 
 
+DEFAULT_ENV_NAME = 'cloudenvy'
+SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', 'default')
+
+
 def _get_config():
     config_file_location = os.environ.get('CLOUDENVY_CONFIG',
                                           os.path.expanduser('~/.cloudenvy'))
     config = ConfigParser.ConfigParser(CONFIG_DEFAULTS)
     config.read(config_file_location)
     return config
-
-
-SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', 'default')
-DEFAULT_ENV_NAME = 'cloudenvy'
 
 
 class ImageNotFound(RuntimeError):
@@ -57,7 +57,6 @@ def not_found(func):
         except novaclient.exceptions.NotFound:
             return None
     return wrapped
-
 
 
 class CloudAPI(object):
@@ -254,7 +253,9 @@ def provision(env=DEFAULT_ENV_NAME):
     local_userdata_loc = os.environ.get('CE_USERDATA_LOCATION',
                                              './userdata')
     remote_userdata_loc = '~/userdata'
-    with fabric.api.settings(host_string=env.ip, user=remote_user, forward_agent=True):
+    with fabric.api.settings(host_string=env.ip,
+                             user=remote_user,
+                             forward_agent=True):
         for i in range(10):
             try:
                 fabric.operations.put(local_userdata_loc,
