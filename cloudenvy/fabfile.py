@@ -379,3 +379,6 @@ def destroy(env=DEFAULT_ENV_NAME):
         logging.info('...done.')
     else:
         logging.error('No environment exists.')
+
+
+COMMANDS = [up, provision, snapshot, ip, ssh]
