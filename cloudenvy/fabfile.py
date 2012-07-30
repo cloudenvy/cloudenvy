@@ -56,6 +56,10 @@ class FixedIPAssignFailure(RuntimeError):
     pass
 
 
+class FloatingIPAssignFailure(RuntimeError):
+    pass
+
+
 class NoIPsAvailable(RuntimeError):
     pass
 
@@ -180,7 +184,15 @@ class Environment(object):
 
     @property
     def server(self):
-        return self.cloud_api.find_server(self.name)
+        if not self._server:
+            self._server = self.cloud_api.find_server(self.name)
+        return self._server
+
+    @property
+    def ip(self):
+        if not self._ip:
+            self._ip = self.cloud_api.find_ip(self.server.id)
+        return self._ip
 
     def build_server(self):
         image = self.cloud_api.find_image(self.image_name)
@@ -221,7 +233,7 @@ class Environment(object):
         logging.info('...done.')
 
         if self.assign_floating_ip:
-            logging.info('Allocating a floating ip...')
+            logging.info('Assigning a floating ip...')
             try:
                 ip = self.cloud_api.find_free_ip()
             except NoIPsAvailable:
@@ -229,8 +241,18 @@ class Environment(object):
                 self.cloud_api.allocate_floating_ip()
                 ip = self.cloud_api.find_free_ip()
 
-            logging.info('...allocating %s', ip)
+            logging.info('...assigning %s', ip)
             self.cloud_api.assign_ip(server, ip)
+            for i in xrange(60):
+                logging.info('...finding assigned ip')
+                self.cloud_api.find_ip(self.server.id)
+                server = self.cloud_api.get_server(server.id)
+                if len(server.networks):
+                    break
+                if i % 5:
+                    logging.info('...waiting for assigned ip')
+                if i == 59:
+                    raise FloatingIPAssignFailure()
             logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
@@ -262,10 +284,6 @@ class Environment(object):
             fap.close()
             self.cloud_api.create_keypair(name, data)
             logging.info('...done.')
-
-    @property
-    def ip(self):
-        return self.cloud_api.find_ip(self.server.id)
 
     def snapshot(self, name):
         if not self.server:
