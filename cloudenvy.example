@@ -1,0 +1,16 @@
+# Modify this config and place it at ~/.cloudenvy
+# To specify a different config, specify a CLOUDENVY_CONFIG env variable
+
+[DEFAULT]
+keypair_name=<myname>
+keypair_location=/home/<myname>/.ssh/id_rsa.pub
+
+[cloudenvy]
+OS_AUTH_URL=http://<openstack.api.endpoint>:5000/v2.0
+OS_USERNAME=<myname>
+OS_PASSWORD=<mypassword>
+OS_TENANT_NAME=<mytenant>
+OS_TENANT_ID=<mytenantid>
+image_name=Ubuntu 11.10 cloudimg amd64
+flavor_name=m1.large
+assign_floating_ip=True
