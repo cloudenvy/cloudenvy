@@ -16,7 +16,7 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(title='Available commands:')
 
     for cmd in fabfile.COMMANDS:
-        helptext = getattr(cmd, '__docstring', '')
+        helptext = getattr(cmd, '__doc__', '')
         subparser = subparsers.add_parser(cmd.func_name, help=helptext)
         subparser.set_defaults(func=cmd)
 
