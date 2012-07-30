@@ -29,6 +29,8 @@ CONFIG_DEFAULTS = {
 DEFAULT_ENV_NAME = 'cloudenvy'
 SERVICE_NAME = os.environ.get('CLOUDENVY_SERVICE_NAME', DEFAULT_ENV_NAME)
 
+USERDATA_LOCATION = os.environ.get('CLOUDENVY_USERDATA_LOCATION',
+                                   './userdata')
 
 def _get_config():
     config_file_location = os.environ.get('CLOUDENVY_CONFIG',
@@ -308,8 +310,8 @@ def provision(args):
     env = Environment(args.env, _get_config())
     logging.info('Provisioning environment.')
     remote_user = 'ubuntu'
-    local_userdata_loc = os.environ.get('CLOUDENVY_USERDATA_LOCATION',
-                                        './userdata')
+    logging.info('Using userdata from: %s', args.userdata)
+    local_userdata_loc = args.userdata
     remote_userdata_loc = '~/userdata'
     with fabric.api.settings(host_string=env.ip,
                              user=remote_user,

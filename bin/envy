@@ -19,9 +19,18 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(title='Available commands:')
 
     for cmd in fabfile.COMMANDS:
+        cmd_name = cmd.func_name
         helptext = getattr(cmd, '__doc__', '')
-        subparser = subparsers.add_parser(cmd.func_name, help=helptext)
+        subparser = subparsers.add_parser(cmd_name, help=helptext)
         subparser.set_defaults(func=cmd)
+
+        # NOTE(termie): add some specific options, if this ever gets too
+        #               large we should probably switch to manually
+        #               specifying each parser
+        if cmd_name == 'provision':
+            subparser.add_argument('-u', '--userdata', action='store',
+                                   help='specify the location of userdata',
+                                   default=fabfile.USERDATA_LOCATION)
 
     args = parser.parse_args()
 
