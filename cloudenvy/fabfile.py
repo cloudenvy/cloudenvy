@@ -18,9 +18,11 @@ CONFIG_DEFAULTS = {
     'os_region_name': None,
     'os_password': None,
     'assign_floating_ip': False,
-    'keypair_name': None,
-    'keypair_location': None,
-    'sec_group_name': None,
+    # NOTE(termie): not windows compatible
+    'keypair_name': os.getlogin(),
+    'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
+    'flavor_name': 'm1.large',
+    'sec_group_name': 'default',
 }
 
 

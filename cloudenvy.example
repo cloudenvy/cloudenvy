@@ -1,16 +1,41 @@
 # Modify this config and place it at ~/.cloudenvy
-# To specify a different config, specify a CLOUDENVY_CONFIG env variable
+# To use a different config, specify a CLOUDENVY_CONFIG env variable.
 
 [DEFAULT]
-keypair_name=<myname>
-keypair_location=/home/<myname>/.ssh/id_rsa.pub
+# The keypair to use for new instances, defaults to your current login name.
+#keypair_name=<myname>
 
+# The public key to use if the keypair above does not exist, defaults
+# to ~/.ssh/id_rsa.pub
+#keypair_location=/home/<myname>/.ssh/id_rsa.pub
+
+# This is the default environment name, if you want to make multiple
+# environments you should duplicate this section and define new values.
 [cloudenvy]
+
+# Typical novaclient configuration
 OS_AUTH_URL=http://<openstack.api.endpoint>:5000/v2.0
 OS_USERNAME=<myname>
 OS_PASSWORD=<mypassword>
 OS_TENANT_NAME=<mytenant>
 OS_TENANT_ID=<mytenantid>
+
+# Image name to use for new instance
 image_name=Ubuntu 11.10 cloudimg amd64
-flavor_name=m1.large
-assign_floating_ip=True
+
+# Security group to use for the new instance.
+# If it does not exist it will be created with a fairly open set of rules.
+#   ('icmp', -1, -1, '0.0.0.0/0'),
+#   ('tcp', 22, 22, '0.0.0.0/0'),
+#   ('tcp', 443, 443, '0.0.0.0/0'),
+#   ('tcp', 80, 80, '0.0.0.0/0'),
+#   ('tcp', 8080, 8080, '0.0.0.0/0'),
+#   ('tcp', 5000, 5000, '0.0.0.0/0'),
+#   ('tcp', 9292, 9292, '0.0.0.0/0'),
+#sec_group_name=default
+
+# Flavor name to use for new instance.
+#flavor_name=m1.large
+
+# Assign a floating IP to this instance.
+#assign_floating_ip=False
