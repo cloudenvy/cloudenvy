@@ -182,10 +182,17 @@ class Environment(object):
         self._server = None
         self._ip = None
 
+    def find_server(self):
+        return self.cloud_api.find_server(self.name)
+
+    def delete_server(self):
+        self.server.delete()
+        self._server = None
+
     @property
     def server(self):
         if not self._server:
-            self._server = self.cloud_api.find_server(self.name)
+            self._server = self.find_server()
         return self._server
 
     @property
@@ -364,9 +371,11 @@ def ssh(env=DEFAULT_ENV_NAME):
 def destroy(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
     logging.info('Triggering environment deletion.')
-    if env.server:
-        env.server.delete()
-        while env.server:
+    if env.find_server():
+        env.delete_server()
+        while env.find_server():
+            logging.info('...waiting for server to be destroyed')
             time.sleep(1)
+        logging.info('...done.')
     else:
         logging.error('No environment exists.')
