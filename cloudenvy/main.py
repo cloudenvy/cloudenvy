@@ -13,6 +13,8 @@ import fabric.operations
 import novaclient.exceptions
 import novaclient.client
 
+from cloudenvy import exceptions
+
 
 CONFIG_DEFAULTS = {
     'os_service_name': None,
@@ -45,26 +47,6 @@ def _get_config():
     for opt in config.options(SERVICE_NAME):
         logging.debug('  %s = %s', opt, config.get(SERVICE_NAME, opt))
     return config
-
-
-class ImageNotFound(RuntimeError):
-    pass
-
-
-class SnapshotFailure(RuntimeError):
-    pass
-
-
-class FixedIPAssignFailure(RuntimeError):
-    pass
-
-
-class FloatingIPAssignFailure(RuntimeError):
-    pass
-
-
-class NoIPsAvailable(RuntimeError):
-    pass
 
 
 def not_found(func):
@@ -118,7 +100,7 @@ class CloudAPI(object):
         for fip in fips:
             if not fip.instance_id:
                 return fip.ip
-        raise NoIPsAvailable()
+        raise exceptions.NoIPsAvailable()
 
     def find_ip(self, server_id):
         fips = self.client.floating_ips.list()
@@ -207,7 +189,7 @@ class Environment(object):
     def build_server(self):
         image = self.cloud_api.find_image(self.image_name)
         if not image:
-            raise ImageNotFound()
+            raise exceptions.ImageNotFound()
 
         flavor = self.cloud_api.find_flavor(self.flavor_name)
 
@@ -239,14 +221,14 @@ class Environment(object):
             if i % 5:
                 logging.info('...waiting for fixed ip')
             if i == 59:
-                raise FixedIPAssignFailure()
+                raise exceptions.FixedIPAssignFailure()
         logging.info('...done.')
 
         if self.assign_floating_ip:
             logging.info('Assigning a floating ip...')
             try:
                 ip = self.cloud_api.find_free_ip()
-            except NoIPsAvailable:
+            except exceptions.NoIPsAvailable:
                 logging.info('...allocating a new floating ip')
                 self.cloud_api.allocate_floating_ip()
                 ip = self.cloud_api.find_free_ip()
@@ -262,7 +244,7 @@ class Environment(object):
                 if i % 5:
                     logging.info('...waiting for assigned ip')
                 if i == 59:
-                    raise FloatingIPAssignFailure()
+                    raise exceptions.FloatingIPAssignFailur()
             logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
@@ -337,10 +319,10 @@ def up(args):
         logging.info('Building environment.')
         try:
             env.build_server()
-        except ImageNotFound:
+        except exceptions.ImageNotFound:
             logging.error('Could not find image.')
             return
-        except NoIPsAvailable:
+        except exceptions.NoIPsAvailable:
             logging.error('Could not find free IP.')
             return
     if env.ip:
@@ -422,4 +404,4 @@ def main():
     elif args.verbosity == 1:
         logging.getLogger().setLevel(logging.INFO)
 
-    args.func()
+    args.func(args)
