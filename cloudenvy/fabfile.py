@@ -304,6 +304,7 @@ class Environment(object):
 
 
 def provision(env=DEFAULT_ENV_NAME):
+    """Manually provision a remote environment using a userdata script."""
     env = Environment(env, _get_config())
     logging.INFO('Provisioning environment.')
     remote_user = 'ubuntu'
@@ -326,6 +327,7 @@ def provision(env=DEFAULT_ENV_NAME):
 
 
 def up(env=DEFAULT_ENV_NAME):
+    """Create a server and show its IP."""
     env = Environment(env, _get_config())
     if not env.server:
         logging.info('Building environment.')
@@ -344,11 +346,13 @@ def up(env=DEFAULT_ENV_NAME):
 
 
 def snapshot(env=DEFAULT_ENV_NAME, name=None):
+    """Create a snapshot of a running server."""
     env = Environment(env, _get_config())
     env.snapshot(name or ('%s-snapshot' % env.name))
 
 
 def ip(env=DEFAULT_ENV_NAME):
+    """Show the IP of the current server."""
     env = Environment(env, _get_config())
     if not env.server:
         logging.error('Environment has not been created.\n'
@@ -360,6 +364,7 @@ def ip(env=DEFAULT_ENV_NAME):
 
 
 def ssh(env=DEFAULT_ENV_NAME):
+    """SSH into the current server."""
     env = Environment(env, _get_config())
     if env.ip:
         remote_user = 'ubuntu'
@@ -369,6 +374,7 @@ def ssh(env=DEFAULT_ENV_NAME):
 
 
 def destroy(env=DEFAULT_ENV_NAME):
+    """Power-off and destroy the current server."""
     env = Environment(env, _get_config())
     logging.info('Triggering environment deletion.')
     if env.find_server():
