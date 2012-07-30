@@ -305,14 +305,15 @@ class Environment(object):
 
 def provision(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
-    logging.INFO('Provisioning environment.')
+    logging.info('Provisioning environment.')
     remote_user = 'ubuntu'
     local_userdata_loc = os.environ.get('CLOUDENVY_USERDATA_LOCATION',
                                         './userdata')
     remote_userdata_loc = '~/userdata'
     with fabric.api.settings(host_string=env.ip,
                              user=remote_user,
-                             forward_agent=True):
+                             forward_agent=True,
+                             disable_known_hosts=True):
         for i in range(10):
             try:
                 fabric.operations.put(local_userdata_loc,
@@ -363,7 +364,11 @@ def ssh(env=DEFAULT_ENV_NAME):
     env = Environment(env, _get_config())
     if env.ip:
         remote_user = 'ubuntu'
-        fabric.operations.local('ssh %s@%s' % (remote_user, env.ip))
+        disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
+                               ' -o StrictHostKeyChecking=no')
+        fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
+                                                  remote_user,
+                                                  env.ip))
     else:
         logging.error('Could not find IP.')
 
