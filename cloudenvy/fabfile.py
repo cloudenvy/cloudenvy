@@ -303,9 +303,9 @@ class Environment(object):
             print name
 
 
-def provision(env=DEFAULT_ENV_NAME):
+def provision(args):
     """Manually provision a remote environment using a userdata script."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
     logging.info('Provisioning environment.')
     remote_user = 'ubuntu'
     local_userdata_loc = os.environ.get('CLOUDENVY_USERDATA_LOCATION',
@@ -327,9 +327,9 @@ def provision(env=DEFAULT_ENV_NAME):
         fabric.operations.run(remote_userdata_loc)
 
 
-def up(env=DEFAULT_ENV_NAME):
+def up(args):
     """Create a server and show its IP."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
     if not env.server:
         logging.info('Building environment.')
         try:
@@ -346,15 +346,16 @@ def up(env=DEFAULT_ENV_NAME):
         print 'Environment has no IP.'
 
 
-def snapshot(env=DEFAULT_ENV_NAME, name=None):
+def snapshot(args, name=None):
     """Create a snapshot of a running server."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
     env.snapshot(name or ('%s-snapshot' % env.name))
 
 
-def ip(env=DEFAULT_ENV_NAME):
+def ip(args):
     """Show the IP of the current server."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
+
     if not env.server:
         logging.error('Environment has not been created.\n'
                       'Try running `envy up` first?')
@@ -364,9 +365,9 @@ def ip(env=DEFAULT_ENV_NAME):
         logging.error('Could not find IP.')
 
 
-def ssh(env=DEFAULT_ENV_NAME):
+def ssh(args):
     """SSH into the current server."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
     if env.ip:
         remote_user = 'ubuntu'
         disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
@@ -378,9 +379,9 @@ def ssh(env=DEFAULT_ENV_NAME):
         logging.error('Could not find IP.')
 
 
-def destroy(env=DEFAULT_ENV_NAME):
+def destroy(args):
     """Power-off and destroy the current server."""
-    env = Environment(env, _get_config())
+    env = Environment(args.env, _get_config())
     logging.info('Triggering environment deletion.')
     if env.find_server():
         env.delete_server()
@@ -392,4 +393,4 @@ def destroy(env=DEFAULT_ENV_NAME):
         logging.error('No environment exists.')
 
 
-COMMANDS = [up, provision, snapshot, ip, ssh]
+COMMANDS = [up, provision, snapshot, ip, ssh, destroy]

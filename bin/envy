@@ -13,6 +13,9 @@ if __name__ == '__main__':
             description='Launch a virtual machine in an openstack environment.')
     parser.add_argument('-v', '--verbosity', action='count',
                         help='increase output verbosity')
+    parser.add_argument('-e', '--env', action='store',
+                        help='specify which environemnt config to use',
+                        default=fabfile.DEFAULT_ENV_NAME)
     subparsers = parser.add_subparsers(title='Available commands:')
 
     for cmd in fabfile.COMMANDS:
@@ -31,4 +34,4 @@ if __name__ == '__main__':
     elif args.verbosity == 1:
         logging.getLogger().setLevel(logging.INFO)
 
-    args.func()
+    args.func(args)
