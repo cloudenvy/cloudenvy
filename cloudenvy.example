@@ -1,4 +1,5 @@
-# Modify this config and place it at ~/.cloudenvy
+# Modify this config and place it at ~/.cloudenvy or as .cloudenvy in the
+# base of one of your projects.
 # To use a different config, specify a CLOUDENVY_CONFIG env variable.
 
 [DEFAULT]
@@ -9,9 +10,10 @@
 # to ~/.ssh/id_rsa.pub
 #keypair_location=/home/<myname>/.ssh/id_rsa.pub
 
-# This is the default environment name, if you want to make multiple
-# environments you should duplicate this section and define new values.
-[cloudenvy]
+
+# This is the default cloud name, if you want to use multiple
+# cloud environments you should duplicate this section and define new values.
+[cloud:envy]
 
 # Typical novaclient configuration
 OS_AUTH_URL=http://<openstack.api.endpoint>:5000/v2.0
@@ -20,6 +22,10 @@ OS_PASSWORD=<mypassword>
 OS_TENANT_NAME=<mytenant>
 OS_TENANT_ID=<mytenantid>
 
+
+# This is the default template name, if you want to use multiple
+# instance templates you should duplicate this section and define new values.
+[template:envy]
 # Image name to use for new instance
 image_name=Ubuntu 11.10 cloudimg amd64
 
