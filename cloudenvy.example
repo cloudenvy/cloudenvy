@@ -29,6 +29,12 @@ OS_TENANT_ID=<mytenantid>
 # Image name to use for new instance
 image_name=Ubuntu 11.10 cloudimg amd64
 
+# Remote user to use for this template
+#remote_user=root
+
+# Userdata to use when provisioning or if an `envy up --provision` is used.
+#userdata=./userdata.sh
+
 # Security group to use for the new instance.
 # If it does not exist it will be created with a fairly open set of rules.
 #   ('icmp', -1, -1, '0.0.0.0/0'),
@@ -45,3 +51,4 @@ image_name=Ubuntu 11.10 cloudimg amd64
 
 # Assign a floating IP to this instance.
 #assign_floating_ip=False
+
