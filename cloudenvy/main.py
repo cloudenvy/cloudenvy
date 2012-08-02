@@ -69,7 +69,7 @@ def provision(args):
     logging.info('Using userdata from: %s', userdata_path)
     local_userdata_loc = args.userdata
     remote_userdata_loc = '~/userdata'
-    with fabric.api.settings(host_string=env.ip,
+    with fabric.api.settings(host_string=env.ip(),
                              user=remote_user,
                              forward_agent=True,
                              disable_known_hosts=True):
@@ -89,7 +89,7 @@ def provision(args):
 def up(args):
     """Create a server and show its IP."""
     env = template.Template(args.name, args, _get_config(args))
-    if not env.server:
+    if not env.server():
         logging.info('Building environment.')
         try:
             env.build_server()
@@ -99,8 +99,8 @@ def up(args):
         except exceptions.NoIPsAvailable:
             logging.error('Could not find free IP.')
             return
-    if env.ip:
-        print env.ip
+    if env.ip():
+        print env.ip()
     else:
         print 'Environment has no IP.'
 
@@ -115,11 +115,11 @@ def ip(args):
     """Show the IP of the current server."""
     env = template.Template(args.name, args, _get_config(args))
 
-    if not env.server:
+    if not env.server():
         logging.error('Environment has not been created.\n'
                       'Try running `envy up` first?')
-    elif env.ip:
-        print env.ip
+    elif env.ip():
+        print env.ip()
     else:
         logging.error('Could not find IP.')
 
@@ -127,13 +127,13 @@ def ip(args):
 def ssh(args):
     """SSH into the current server."""
     env = template.Template(args.name, args, _get_config(args))
-    if env.ip:
+    if env.ip():
         remote_user = 'ubuntu'
         disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
                                ' -o StrictHostKeyChecking=no')
         fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
                                                   remote_user,
-                                                  env.ip))
+                                                  env.ip()))
     else:
         logging.error('Could not find IP.')
 
@@ -155,7 +155,7 @@ def destroy(args):
 COMMANDS = [up, provision, snapshot, ip, ssh, destroy]
 
 
-def main():
+def _build_parser():
     parser = argparse.ArgumentParser(
             description='Launch a virtual machine in an openstack environment.')
     parser.add_argument('-v', '--verbosity', action='count',
@@ -193,7 +193,11 @@ def main():
             subparser.add_argument('-p', '--provision', action='store_true',
                                    help='supply userdata at server creation',
                                    default=False)
+    return parser
 
+
+def main():
+    parser = _build_parser()
     args = parser.parse_args()
 
     if args.verbosity == 3:
