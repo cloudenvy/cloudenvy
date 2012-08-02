@@ -28,6 +28,8 @@ CONFIG_DEFAULTS = {
     'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
     'flavor_name': 'm1.large',
     'sec_group_name': 'default',
+    'remote_user': 'ubuntu',
+    'userdata': './userdata.sh',
 }
 
 
@@ -58,10 +60,13 @@ def _get_config(args):
 
 def provision(args):
     """Manually provision a remote environment using a userdata script."""
-    env = template.Template(args.name, args, _get_config(args))
-    logging.info('Provisioning environment.')
-    remote_user = 'ubuntu'
-    logging.info('Using userdata from: %s', args.userdata)
+    config = _get_config(args)
+    env = template.Template(args.name, args, config)
+    logging.info('Provisioning environment...')
+
+    remote_user = args.remote_user or env.remote_user
+    userdata_path = args.userdata or env.userdata
+    logging.info('Using userdata from: %s', userdata_path)
     local_userdata_loc = args.userdata
     remote_userdata_loc = '~/userdata'
     with fabric.api.settings(host_string=env.ip,
@@ -78,6 +83,7 @@ def provision(args):
                 time.sleep(1)
 
         fabric.operations.run(remote_userdata_loc)
+    logging.info('...done.')
 
 
 def up(args):
@@ -175,10 +181,18 @@ def main():
         # NOTE(termie): add some specific options, if this ever gets too
         #               large we should probably switch to manually
         #               specifying each parser
-        if cmd_name == 'provision':
+        if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
                                    help='specify the location of userdata',
-                                   default='./userdata')
+                                   default=CONFIG_DEFAULTS['userdata'])
+        if cmd_name in ('provision'):
+            subparser.add_argument('-r', '--remote_user', action='store',
+                                   help='remote user to provision',
+                                   default=None)
+        if cmd_name in ('up'):
+            subparser.add_argument('-p', '--provision', action='store_true',
+                                   help='supply userdata at server creation',
+                                   default=False)
 
     args = parser.parse_args()
 

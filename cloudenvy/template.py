@@ -8,6 +8,7 @@ class Template(object):
     def __init__(self, name, args, config):
         self.name = name
         self.config = config
+        self.args = args
         section = 'template:%s' % args.template
         self.cloud_api = cloud.CloudAPI(args.cloud, self.config)
         self.image_name = config.get(section, 'image_name')
@@ -16,6 +17,8 @@ class Template(object):
         self.sec_group_name = config.get(section, 'sec_group_name')
         self.keypair_name = config.get(section, 'keypair_name')
         self.keypair_location = config.get(section, 'keypair_location')
+        self.remote_user = config.get(section, 'remote_user')
+        self.userdata = config.get(section, 'userdata')
         self._server = None
         self._ip = None
 
@@ -62,17 +65,22 @@ class Template(object):
                                         self.keypair_location)
             build_kwargs['key_name'] = self.keypair_name
 
+        if self.args.provision:
+            userdata_path = self.args.userdata or self.userdata
+            logging.info('Using userdata from: %s', userdata_path)
+            build_kwargs['user_data'] = userdata_path
+
         logging.info('Creating server...')
         server = self.cloud_api.create_server(**build_kwargs)
 
         # Wait for server to get fixed ip
-        for i in xrange(60):
+        for i in xrange(600):
             server = self.cloud_api.get_server(server.id)
             if len(server.networks):
                 break
-            if i % 5:
+            if i % 20:
                 logging.info('...waiting for fixed ip')
-            if i == 59:
+            if i == 599:
                 raise exceptions.FixedIPAssignFailure()
         logging.info('...done.')
 
@@ -89,9 +97,9 @@ class Template(object):
             self.cloud_api.assign_ip(server, ip)
             for i in xrange(60):
                 logging.info('...finding assigned ip')
-                self.cloud_api.find_ip(self.server.id)
-                server = self.cloud_api.get_server(server.id)
-                if len(server.networks):
+                found_ip = self.cloud_api.find_ip(self.server.id)
+                #server = self.cloud_api.get_server(server.id)
+                if found_ip:
                     break
                 if i % 5:
                     logging.info('...waiting for assigned ip')
