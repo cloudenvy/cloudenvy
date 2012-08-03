@@ -26,19 +26,17 @@ class Template(object):
         return self.cloud_api.find_server(self.name)
 
     def delete_server(self):
-        self.server.delete()
+        self.server().delete()
         self._server = None
 
-    @property
     def server(self):
         if not self._server:
             self._server = self.find_server()
         return self._server
 
-    @property
     def ip(self):
         if not self._ip:
-            self._ip = self.cloud_api.find_ip(self.server.id)
+            self._ip = self.cloud_api.find_ip(self.server().id)
         return self._ip
 
     def build_server(self):
@@ -80,7 +78,7 @@ class Template(object):
                 break
             if i % 20:
                 logging.info('...waiting for fixed ip')
-            if i == 599:
+            if i == 59:
                 raise exceptions.FixedIPAssignFailure()
         logging.info('...done.')
 
@@ -97,7 +95,7 @@ class Template(object):
             self.cloud_api.assign_ip(server, ip)
             for i in xrange(60):
                 logging.info('...finding assigned ip')
-                found_ip = self.cloud_api.find_ip(self.server.id)
+                found_ip = self.cloud_api.find_ip(self.server().id)
                 #server = self.cloud_api.get_server(server.id)
                 if found_ip:
                     break
@@ -138,12 +136,12 @@ class Template(object):
             logging.info('...done.')
 
     def snapshot(self, name):
-        if not self.server:
+        if not self.server():
             logging.error('Environment has not been created.\n'
                           'Try running `envy up` first?')
         else:
             logging.info('Creating snapshot %s...', name)
-            self.cloud_api.snapshot(self.server, name)
+            self.cloud_api.snapshot(self.server(), name)
             logging.info('...done.')
             print name
 
