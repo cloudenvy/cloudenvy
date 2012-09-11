@@ -18,31 +18,37 @@ python setup.py install
 
 ## Configuration
 
-You can set options in ~/.cloudenvy instead of passing environment
-variables. This config file also has additional options such as:
+You must set options in ~/.cloudenvy.  Here is a minimal config:
 
+    [cloud:envy]
     keypair_name=xxx
-    keypair_location=/Users/xxx/.ssh/id_rsa.pub
+    keypair_location=/home/anthony/.ssh/id_rsa.pub
     image_name=Ubuntu 11.10 cloudimg amd64
-    flavor_name=m1.large
+    flavor_name=m1.small
     assign_floating_ip=True
+    os_username=xxx
+    os_password=xxx
+    os_tenant_name=xxx
+    os_auth_url=http://127.0.0.1:5000/v2.0
+
+    [template:envy]
+    # Image name to use for new instance
+    image_name=Ubuntu 11.10 cloudimg amd64
+    assign_floating_ip=True
+
+Specify an alternative config with the environment variable CLOUDENV_CONFIG.
 
 ## Usage
 
 Launching a development environment couldn't be easier.
 
-Required OpenStack Environment Variables (make sure you use your own
-account!)
-
-    export OS_AUTH_URL=http://10.9.9.9:5000/v2.0
-    export OS_TENANT_ID=7c1fcbd408cb437092b418c54e0faQe1
-    export OS_TENANT_NAME=russia
-    export OS_USERNAME=brosefstalin
-    export OS_PASSWORD=iliketurtles
-
 Set up and launch a bare instance.
 
     envy up
+
+Start an instance with verbose logging.
+
+    envy -v up
 
 To name or switch your environment something other than the default, you must pass in
 a fabric argument for the ENV_NAME

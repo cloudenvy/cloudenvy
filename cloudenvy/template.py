@@ -1,5 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import logging
+import time
 
 from cloudenvy import cloud
 from cloudenvy import exceptions
@@ -76,10 +77,12 @@ class Template(object):
             server = self.cloud_api.get_server(server.id)
             if len(server.networks):
                 break
-            if i % 20:
+            if i % 5:
                 logging.info('...waiting for fixed ip')
             if i == 59:
                 raise exceptions.FixedIPAssignFailure()
+            time.sleep(1)
+
         logging.info('...done.')
 
         if self.assign_floating_ip:
