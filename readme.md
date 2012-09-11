@@ -60,6 +60,10 @@ Deploy anything you need on the instance. NOTE: This defaults to
 
     envy provision
 
+Or, 
+
+    envy provision -u [file]
+
 Backup your instance with an image snapshot.
 
     envy backup
@@ -75,4 +79,3 @@ SSH into your instance (note that you will have to allow port 22 in the default 
 Destroy your instance
 
     envy destroy
-
