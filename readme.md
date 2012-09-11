@@ -36,7 +36,7 @@ You must set options in ~/.cloudenvy.  Here is a minimal config:
     image_name=Ubuntu 11.10 cloudimg amd64
     assign_floating_ip=True
 
-Specify an alternative config with the environment variable CLOUDENV_CONFIG.
+Specify an alternative config with the environment variable CLOUDENVY_CONFIG.
 
 ## Usage
 

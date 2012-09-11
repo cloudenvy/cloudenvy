@@ -34,7 +34,7 @@ CONFIG_DEFAULTS = {
 
 
 def _get_config(args):
-    global_config = os.environ.get('CLOUDENV_CONFIG',
+    global_config = os.environ.get('CLOUDENVY_CONFIG',
                                    os.path.expanduser('~/.cloudenvy'))
     local_config = './.cloudenvy'
     configs = [global_config, local_config]
