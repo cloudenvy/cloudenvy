@@ -22,7 +22,7 @@ You must set options in ~/.cloudenvy.  Here is a minimal config:
 
     [cloud:envy]
     keypair_name=xxx
-    keypair_location=/home/anthony/.ssh/id_rsa.pub
+    keypair_location=/home/xxx/.ssh/id_rsa.pub
     image_name=Ubuntu 11.10 cloudimg amd64
     flavor_name=m1.small
     assign_floating_ip=True
@@ -60,7 +60,7 @@ Deploy anything you need on the instance. NOTE: This defaults to
 
     envy provision
 
-Or, 
+Or,
 
     envy provision -u [file]
 
