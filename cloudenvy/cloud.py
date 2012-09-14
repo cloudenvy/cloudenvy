@@ -1,5 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import functools
+import exceptions
 
 import novaclient.exceptions
 import novaclient.client
