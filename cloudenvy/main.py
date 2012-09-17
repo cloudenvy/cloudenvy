@@ -124,6 +124,20 @@ def ip(args):
         logging.error('Could not find IP.')
 
 
+def scp(args):
+    """SCP Files to your ENVy"""
+    env = template.Template(args.name, args, _get_config(args))
+
+    if env.ip():
+        remote_user = 'ubuntu'
+        host_string = '%s@%s' % (remote_user, env.ip())
+
+        with fabric.api.settings(host_string=host_string):
+            fabric.operations.put(args.source, args.target)
+    else:
+        logging.error('Could not find IP to upload file to.')
+
+
 def ssh(args):
     """SSH into the current server."""
     env = template.Template(args.name, args, _get_config(args))
@@ -152,7 +166,7 @@ def destroy(args):
         logging.error('No environment exists.')
 
 
-COMMANDS = [up, provision, snapshot, ip, ssh, destroy]
+COMMANDS = [up, provision, snapshot, ip, ssh, destroy, scp]
 
 
 def _build_parser():
@@ -193,6 +207,10 @@ def _build_parser():
             subparser.add_argument('-p', '--provision', action='store_true',
                                    help='supply userdata at server creation',
                                    default=False)
+        if cmd_name in ('scp'):
+            subparser.add_argument('source')
+            subparser.add_argument('target')
+
     return parser
 
 
