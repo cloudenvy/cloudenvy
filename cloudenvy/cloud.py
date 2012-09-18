@@ -19,15 +19,14 @@ def not_found(func):
 class CloudAPI(object):
     def __init__(self, name, config):
         self._client = None
-        self.name = name
         self.config = config
         section = 'cloud:%s' % name
+
+        # OpenStack Auth Items
         self.user = self.config.get(section, 'OS_USERNAME')
         self.password = self.config.get(section, 'OS_PASSWORD')
         self.tenant_name = self.config.get(section, 'OS_TENANT_NAME')
         self.auth_url = self.config.get(section, 'OS_AUTH_URL')
-        self.service_name = self.config.get(section, 'OS_SERVICE_NAME')
-        self.region_name = self.config.get(section, 'OS_REGION_NAME')
 
     @property
     def client(self):
@@ -37,9 +36,7 @@ class CloudAPI(object):
                 self.user,
                 self.password,
                 self.tenant_name,
-                self.auth_url,
-                service_name=self.service_name,
-                region_name=self.region_name)
+                self.auth_url)
         return self._client
 
     @not_found

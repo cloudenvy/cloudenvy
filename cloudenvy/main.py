@@ -10,32 +10,29 @@ import time
 
 import fabric.api
 import fabric.operations
-import novaclient.exceptions
-import novaclient.client
 
-from cloudenvy import cloud
 from cloudenvy import exceptions
 from cloudenvy import template
 
 
 CONFIG_DEFAULTS = {
-    'os_service_name': None,
-    'os_region_name': None,
-    'os_password': None,
+    'os_username': os.environ.get('OS_USERNAME', None),
+    'os_password': os.environ.get('OS_PASSWORD', None),
+    'os_tenant_name': os.environ.get('OS_TENANT_NAME', None),
+    'os_auth_url': os.environ.get('OS_AUTH_URL', None),
     # NOTE(termie): not windows compatible
     'keypair_name': os.getlogin(),
     'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
-    'flavor_name': 'm1.large',
-    'sec_group_name': 'default',
+    'flavor_name': 'm1.medium',
+    'sec_group_name': 'cloudenvy',
     'remote_user': 'ubuntu',
-    'userdata': './userdata.sh',
 }
 
 
 def _get_config(args):
     global_config = os.environ.get('CLOUDENVY_CONFIG',
                                    os.path.expanduser('~/.cloudenvy'))
-    local_config = './.cloudenvy'
+    local_config = './CloudEnvy'
     configs = [global_config, local_config]
 
     logging.info('Loading config from: %s', configs)
