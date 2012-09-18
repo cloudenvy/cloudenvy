@@ -1,9 +1,11 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import logging
+import novaclient
 import time
 
 from cloudenvy import cloud
 from cloudenvy import exceptions
+
 
 class Template(object):
     def __init__(self, name, args, config):
@@ -15,7 +17,6 @@ class Template(object):
         self.image_name = config.get(section, 'image_name')
         self.flavor_name = config.get(section, 'flavor_name')
         self.assign_floating_ip = config.get(section, 'assign_floating_ip')
-        self.sec_group_name = config.get(section, 'sec_group_name')
         self.keypair_name = config.get(section, 'keypair_name')
         self.keypair_location = config.get(section, 'keypair_location')
         self.remote_user = config.get(section, 'remote_user')
@@ -53,10 +54,10 @@ class Template(object):
             'flavor': flavor,
         }
 
-        if self.sec_group_name is not None:
-            logging.info('Using security group: %s', self.sec_group_name)
-            self._ensure_sec_group_exists(self.sec_group_name)
-            build_kwargs['security_groups'] = [self.sec_group_name]
+        # TODO(jakedahn): security group name should be pulled from config.
+        logging.info('Using security group: %s', 'cloudenvy')
+        self._ensure_sec_group_exists('cloudenvy')
+        build_kwargs['security_groups'] = ['cloudenvy']
 
         if self.keypair_name is not None:
             logging.info('Using keypair: %s', self.keypair_name)
@@ -85,47 +86,58 @@ class Template(object):
 
         logging.info('...done.')
 
-        if self.assign_floating_ip:
-            logging.info('Assigning a floating ip...')
-            try:
-                ip = self.cloud_api.find_free_ip()
-            except exceptions.NoIPsAvailable:
-                logging.info('...allocating a new floating ip')
-                self.cloud_api.allocate_floating_ip()
-                ip = self.cloud_api.find_free_ip()
+        logging.info('Assigning a floating ip...')
+        try:
+            ip = self.cloud_api.find_free_ip()
+        except exceptions.NoIPsAvailable:
+            logging.info('...allocating a new floating ip')
+            self.cloud_api.allocate_floating_ip()
+            ip = self.cloud_api.find_free_ip()
 
-            logging.info('...assigning %s', ip)
-            self.cloud_api.assign_ip(server, ip)
-            for i in xrange(60):
-                logging.info('...finding assigned ip')
-                found_ip = self.cloud_api.find_ip(self.server().id)
-                #server = self.cloud_api.get_server(server.id)
-                if found_ip:
-                    break
-                if i % 5:
-                    logging.info('...waiting for assigned ip')
-                if i == 59:
-                    raise exceptions.FloatingIPAssignFailur()
-            logging.info('...done.')
+        logging.info('...assigning %s', ip)
+        self.cloud_api.assign_ip(server, ip)
+        for i in xrange(60):
+            logging.info('...finding assigned ip')
+            found_ip = self.cloud_api.find_ip(self.server().id)
+            #server = self.cloud_api.get_server(server.id)
+            if found_ip:
+                break
+            if i % 5:
+                logging.info('...waiting for assigned ip')
+            if i == 59:
+                raise exceptions.FloatingIPAssignFailur()
+        logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
-        if not self.cloud_api.find_security_group(name):
-            logging.info('No security group named %s found, creating...', name)
-            sec_group = self.cloud_api.create_security_group(name)
+        sec_group_name = 'cloudenvy'
+        sec_group = self.cloud_api.find_security_group(sec_group_name)
 
-            rules = [
-                ('icmp', -1, -1, '0.0.0.0/0'),
-                ('tcp', 22, 22, '0.0.0.0/0'),
-                ('tcp', 443, 443, '0.0.0.0/0'),
-                ('tcp', 80, 80, '0.0.0.0/0'),
-                ('tcp', 8080, 8080, '0.0.0.0/0'),
-                ('tcp', 5000, 5000, '0.0.0.0/0'),
-                ('tcp', 9292, 9292, '0.0.0.0/0'),
-            ]
-            for rule in rules:
-                logging.debug('... adding rule: %s', rule)
+        if not sec_group:
+            try:
+                sec_group = self.cloud_api.create_security_group(
+                    sec_group_name)
+            except novaclient.exceptions.BadRequest:
+                logging.error('Security Group "%s" already exists.' %
+                              sec_group_name)
+
+        #TODO(jakedahn): rules should be set by configuration.
+        rules = [
+            ('icmp', -1, -1, '0.0.0.0/0'),
+            ('tcp', 22, 22, '0.0.0.0/0'),
+            ('tcp', 443, 443, '0.0.0.0/0'),
+            ('tcp', 80, 80, '0.0.0.0/0'),
+            ('tcp', 8080, 8080, '0.0.0.0/0'),
+            ('tcp', 5000, 5000, '0.0.0.0/0'),
+            ('tcp', 9292, 9292, '0.0.0.0/0'),
+        ]
+        for rule in rules:
+            logging.debug('... adding rule: %s', rule)
+            try:
                 self.cloud_api.create_security_group_rule(sec_group, rule)
-            logging.info('...done.')
+            except novaclient.exceptions.BadRequest:
+                logging.error('Security Group Rule "%s" already exists.' %
+                              str(rule))
+        logging.info('...done.')
 
     def _ensure_keypair_exists(self, name, pubkey_location):
         if not self.cloud_api.find_keypair(name):
@@ -147,4 +159,3 @@ class Template(object):
             self.cloud_api.snapshot(self.server(), name)
             logging.info('...done.')
             print name
-

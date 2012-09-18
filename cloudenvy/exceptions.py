@@ -1,7 +1,8 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
+
 class Error(RuntimeError):
-  pass
+    pass
 
 
 class ImageNotFound(Error):

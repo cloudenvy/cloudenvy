@@ -33,14 +33,13 @@ class CloudAPI(object):
     def client(self):
         if not self._client:
             self._client = novaclient.client.Client(
-                    '2',
-                    self.user,
-                    self.password,
-                    self.tenant_name,
-                    self.auth_url,
-                    service_name=self.service_name,
-                    region_name=self.region_name,
-            )
+                '2',
+                self.user,
+                self.password,
+                self.tenant_name,
+                self.auth_url,
+                service_name=self.service_name,
+                region_name=self.region_name)
         return self._client
 
     @not_found
@@ -99,7 +98,7 @@ class CloudAPI(object):
 
     def create_security_group_rule(self, security_group, rule):
         return self.client.security_group_rules.create(
-                security_group.id, *rule)
+            security_group.id, *rule)
 
     def allocate_floating_ip(self):
         return self.client.floating_ips.create()
@@ -110,5 +109,3 @@ class CloudAPI(object):
 
     def create_keypair(self, name, key_data):
         return self.client.keypairs.create(name, public_key=key_data)
-
-

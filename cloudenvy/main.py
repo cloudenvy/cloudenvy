@@ -22,7 +22,6 @@ CONFIG_DEFAULTS = {
     'os_service_name': None,
     'os_region_name': None,
     'os_password': None,
-    'assign_floating_ip': False,
     # NOTE(termie): not windows compatible
     'keypair_name': os.getlogin(),
     'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
@@ -171,7 +170,7 @@ COMMANDS = [up, provision, snapshot, ip, ssh, destroy, scp]
 
 def _build_parser():
     parser = argparse.ArgumentParser(
-            description='Launch a virtual machine in an openstack environment.')
+        description='Launch a virtual machine in an openstack environment.')
     parser.add_argument('-v', '--verbosity', action='count',
                         help='increase output verbosity')
     parser.add_argument('-c', '--cloud', action='store',
