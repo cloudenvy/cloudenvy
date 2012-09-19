@@ -146,9 +146,10 @@ def scp(args):
 
 def ssh(args):
     """SSH into the current server."""
-    env = template.Template(args.name, args, _get_config(args))
+    config = _get_config(args)
+    env = template.Template(config)
+    remote_user = config['project_config']['remote_user']
     if env.ip():
-        remote_user = 'ubuntu'
         disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
                                ' -o StrictHostKeyChecking=no')
         fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
