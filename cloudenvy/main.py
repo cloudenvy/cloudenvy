@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 import argparse
-import ConfigParser
 import logging
 import os
 import os.path
@@ -12,7 +11,7 @@ import fabric.api
 import fabric.operations
 
 from cloudenvy import exceptions
-from cloudenvy import template
+from cloudenvy.envy import Envy
 
 
 CONFIG_DEFAULTS = {
@@ -62,7 +61,7 @@ def _get_config(args):
 def provision(args):
     """Manually provision a remote environment using a userdata script."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
     logging.info('Provisioning %s environment...' %
         config['project_config']['name'])
 
@@ -94,7 +93,7 @@ def provision(args):
 def up(args):
     """Create a server and show its IP."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
     if not envy.server():
         logging.info('Building environment.')
         try:
@@ -114,14 +113,14 @@ def up(args):
 def snapshot(args, name=None):
     """Create a snapshot of a running server."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
     envy.snapshot(name or ('%s-snapshot' % envy.name))
 
 
 def ip(args):
     """Show the IP of the current server."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
 
     if not envy.server():
         logging.error('Environment has not been created.\n'
@@ -135,7 +134,7 @@ def ip(args):
 def scp(args):
     """SCP Files to your ENVy"""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
 
     if envy.ip():
         remote_user = 'ubuntu'
@@ -150,7 +149,7 @@ def scp(args):
 def ssh(args):
     """SSH into the current server."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
     remote_user = config['project_config']['remote_user']
     if envy.ip():
         disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
@@ -165,7 +164,7 @@ def ssh(args):
 def destroy(args):
     """Power-off and destroy the current server."""
     config = _get_config(args)
-    envy = template.Template(config)
+    envy = Envy(config)
     logging.info('Triggering environment deletion.')
     if envy.find_server():
         envy.delete_server()

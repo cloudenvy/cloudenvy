@@ -7,7 +7,7 @@ from cloudenvy import cloud
 from cloudenvy import exceptions
 
 
-class Template(object):
+class Envy(object):
     def __init__(self, config):
         self.name = config['project_config']['name']
         self.config = config
