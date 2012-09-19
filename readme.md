@@ -21,8 +21,8 @@ Use setup.py to install cloudenvy and the dependencies:
 You must set your user options in ~/.cloudenvy. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
 
     cloudenvy:
-      keypair_name: localuser
-      keypair_location: /Users/localuser/.ssh/id_rsa.pub
+      keypair_name: localuser # optional - defaults to your username
+      keypair_location: /Users/localuser/.ssh/id_rsa.pub # optional - defaults to ~/.ssh/id_rsa.pub
       sec_group_name: cloudenvy
 
       clouds:
