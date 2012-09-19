@@ -58,38 +58,6 @@ def _get_config(args):
     return config
 
 
-def provision(args):
-    """Manually provision a remote environment using a userdata script."""
-    config = _get_config(args)
-    envy = Envy(config)
-    logging.info('Provisioning %s environment...' %
-                 config['project_config']['name'])
-
-    remote_user = config['project_config']['remote_user']
-    userdata_path = config['project_config']['userdata_path']
-    remote_userdata_path = '~/provision_script'
-
-    logging.info('Using userdata from: %s', userdata_path)
-
-    with fabric.api.settings(host_string=envy.ip(),
-                             user=remote_user,
-                             forward_agent=True,
-                             disable_known_hosts=True):
-        for i in range(10):
-            try:
-                fabric.operations.put(userdata_path,
-                                      remote_userdata_path,
-                                      mode=0755)
-                break
-            except fabric.exceptions.NetworkError:
-                logging.error("Unable to upload file, trying again in 3 \
-                    seconds.")
-                time.sleep(3)
-
-        fabric.operations.run(remote_userdata_path)
-    logging.info('...done.')
-
-
 def up(args):
     """Create a server and show its IP."""
     config = _get_config(args)
@@ -104,10 +72,45 @@ def up(args):
         except exceptions.NoIPsAvailable:
             logging.error('Could not find free IP.')
             return
+    if envy.auto_provision:
+        provision(args)
     if envy.ip():
         print envy.ip()
     else:
         print 'Environment has no IP.'
+
+
+def provision(args):
+    """Manually provision a remote environment using a userdata script."""
+    config = _get_config(args)
+    envy = Envy(config)
+    logging.info('Provisioning %s environment...' %
+                 config['project_config']['name'])
+
+    remote_user = config['project_config']['remote_user']
+    provision_script_path = config['project_config']['provision_script_path']
+    remote_provision_script_path = '~/provision_script'
+
+    logging.info('Using userdata from: %s', provision_script_path)
+
+    with fabric.api.settings(host_string=envy.ip(),
+                             user=remote_user,
+                             forward_agent=True,
+                             disable_known_hosts=True):
+        for i in range(12):
+            try:
+                fabric.operations.put(provision_script_path,
+                                      remote_provision_script_path,
+                                      mode=0755)
+                break
+            except fabric.exceptions.NetworkError:
+                logging.error("Unable to upload file. Your cloud instance is "
+                              "probably not yet built. Trying again in 10 "
+                              "seconds.")
+                time.sleep(10)
+
+        fabric.operations.run(remote_provision_script_path)
+    logging.info('...done.')
 
 
 def snapshot(args, name=None):

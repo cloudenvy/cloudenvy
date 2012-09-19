@@ -20,7 +20,8 @@ class Envy(object):
         self.keypair_name = self.user_config['keypair_name']
         self.keypair_location = self.user_config['keypair_location']
         self.remote_user = self.project_config['remote_user']
-        self.userdata = self.project_config['userdata_path']
+        self.provision_script = self.project_config['provision_script_path']
+        self.auto_provision = self.project_config['auto_provision']
         self._server = None
         self._ip = None
 
@@ -65,10 +66,11 @@ class Envy(object):
                                         self.keypair_location)
             build_kwargs['key_name'] = self.keypair_name
 
-        if self.project_config['userdata_path']:
-            userdata_path = self.project_config['userdata_path']
-            logging.info('Using userdata from: %s', userdata_path)
-            build_kwargs['user_data'] = userdata_path
+        #TODO(jakedahn): Reintroduce this as a 'cloudconfigdrive' config flag.
+        # if self.project_config['userdata_path']:
+        #     userdata_path = self.project_config['userdata_path']
+        #     logging.info('Using userdata from: %s', userdata_path)
+        #     build_kwargs['user_data'] = userdata_path
 
         logging.info('Creating server...')
         server = self.cloud_api.create_server(**build_kwargs)
