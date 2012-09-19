@@ -63,7 +63,7 @@ def provision(args):
     config = _get_config(args)
     envy = Envy(config)
     logging.info('Provisioning %s environment...' %
-        config['project_config']['name'])
+                 config['project_config']['name'])
 
     remote_user = config['project_config']['remote_user']
     userdata_path = config['project_config']['userdata_path']
