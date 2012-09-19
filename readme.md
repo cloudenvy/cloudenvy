@@ -3,79 +3,87 @@
 The goal of CloudEnvy is to allow developers to easily spin up instances
 for development in an OpenStack cloud.
 
-It should be usable on Rackspace Cloud, HP Cloud, or wherever the
-OpenStack APIs are in place.
+CloudEnvy is built on a few principles.
 
-NOTE: Currently CloudEnvy only works for a single instance, we are
-looking to expand into multi-tenant multi-instance environments, but for
-the prototype 1 environment == 1 instance.
+    1. Bootstrapping an environment should only take 1 command.
+    2. Hardware is the enemy, virtualize your environments so others can play with you.
+    3. Never rely on tools which you can not hack.
 
 ## Installation
 
 Use setup.py to install cloudenvy and the dependencies:
 
-python setup.py install
+    python setup.py install
 
 ## Configuration
 
-You must set options in ~/.cloudenvy.  Here is a minimal config:
+### User Config
+You must set your user options in ~/.cloudenvy. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
 
-    [cloud:envy]
-    keypair_name=xxx
-    keypair_location=/home/xxx/.ssh/id_rsa.pub
-    image_name=Ubuntu 11.10 cloudimg amd64
-    flavor_name=m1.small
-    assign_floating_ip=True
-    os_username=xxx
-    os_password=xxx
-    os_tenant_name=xxx
-    os_auth_url=http://127.0.0.1:5000/v2.0
+    cloudenvy:
+      keypair_name: localuser
+      keypair_location: /Users/localuser/.ssh/id_rsa.pub
+      sec_group_name: cloudenvy
 
-    [template:envy]
-    # Image name to use for new instance
-    image_name=Ubuntu 11.10 cloudimg amd64
-    assign_floating_ip=True
+      clouds:
+        envrionment1:
+          os_username: username
+          os_password: password
+          os_tenant_name: tenant_name
+          os_auth_url: http://urltokeystoneendpoint.com:5000/v2.0/
 
-Specify an alternative config with the environment variable CLOUDENVY_CONFIG.
+### Project Config
+
+Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at the root of your project.
+
+    project_config:
+      name: foo
+      image_name: Ubuntu 11.10
+      remote_user: ubuntu
+      flavor_name: m1.medium
+      provision_script_path: '/Users/jakedahn/Desktop/provision_script' # optional
+      auto_provision: True # optional - defaults to False.
+
 
 ## Usage
 
-Launching a development environment couldn't be easier.
+### Launch
 
-Set up and launch a bare instance.
-
+Launch a bare instance
+    
     envy up
 
-Start an instance with verbose logging.
+NOTE: If your project configuration specifies ```auto_provision: True``` then ```envy up``` will run the provision script once the instance is built and running.
 
-    envy -v up
+NOTE: Use the ```-v``` flag to get verbose logging output. Example: ```envy -v up```
 
-To name or switch your environment something other than the default, you must pass in
-a fabric argument for the ENV_NAME
+### Provision
 
-    envy up:<name>
-
-Deploy anything you need on the instance. NOTE: This defaults to
-./userdata in the same directory as your fabfile.
+To provision a script, you must set the path to the bash file you wish to run on your instance.
 
     envy provision
 
-Or,
+NOTE: Provisioning an ENVy does not use the ```OpenStack CloudConfigDrive```. Instead it uploads the provision script, and runs it using Fabric. This allows you to perform operations which usually require ssh authentication.
 
-    envy provision -u [file]
 
-Backup your instance with an image snapshot.
-
-    envy backup
-
-Get your instance IP address
+### Get your ENVy IP
 
     envy ip
 
-SSH into your instance (note that you will have to allow port 22 in the default security group)
+### SSH to your ENVy
+
+SSH into your instance.
 
     envy ssh
 
+
+NOTE: It is highly recommended that you enable SSH Agent Forwarding. The fastest way to do this is to run:
+
+    ssh-add
+
+
+### Destroy your ENVy
+
 Destroy your instance
 
-    envy destroy
+    envy down
