@@ -2,11 +2,11 @@
 
 import argparse
 import ConfigParser
-import functools
 import logging
 import os
 import os.path
 import time
+import yaml
 
 import fabric.api
 import fabric.operations
@@ -16,87 +16,97 @@ from cloudenvy import template
 
 
 CONFIG_DEFAULTS = {
-    'os_username': os.environ.get('OS_USERNAME', None),
-    'os_password': os.environ.get('OS_PASSWORD', None),
-    'os_tenant_name': os.environ.get('OS_TENANT_NAME', None),
-    'os_auth_url': os.environ.get('OS_AUTH_URL', None),
-    # NOTE(termie): not windows compatible
     'keypair_name': os.getlogin(),
     'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
-    'flavor_name': 'm1.medium',
+    'flavor_name': 'm1.small',
     'sec_group_name': 'cloudenvy',
     'remote_user': 'ubuntu',
+    'auto_provision': False,
 }
 
 
+#TODO(jakedahn): clean up this entire method, it's kind of hacky.
 def _get_config(args):
-    global_config = os.environ.get('CLOUDENVY_CONFIG',
-                                   os.path.expanduser('~/.cloudenvy'))
-    local_config = './CloudEnvy'
-    configs = [global_config, local_config]
+    user_config_path = os.path.expanduser('~/.cloudenvy')
+    project_config_path = './CloudEnvy.yml'
 
-    logging.info('Loading config from: %s', configs)
-    config = ConfigParser.ConfigParser(CONFIG_DEFAULTS)
-    config.read(configs)
+    if os.path.exists(user_config_path):
+        user_config = {'cloudenvy': CONFIG_DEFAULTS}
+        user_yaml = yaml.load(open(user_config_path))['cloudenvy']
+        user_config.update({'cloudenvy': user_yaml})
+    else:
+        logging.error("Could not read ~/.cloudenvy. Please make sure \
+            ~/.cloudenvy has the proper configuration.")
+        raise exceptions.UserConfigNotPresent()
 
-    logging.debug('Loaded config:')
+    if os.path.exists(project_config_path):
+        project_config = yaml.load(open(project_config_path))
+    else:
+        logging.error("Could not read ./CloudEnvy.yml. Please make sure you \
+            have a CloudEnvy.yml file in your current directory.")
+        raise exceptions.ProjectConfigNotPresent()
 
-    cloud_section = 'cloud:%s' % args.cloud
-    logging.debug('[%s]', cloud_section)
-    for opt in config.options(cloud_section):
-        logging.debug('  %s = %s', opt, config.get(cloud_section, opt))
+    config = dict(project_config.items() + user_config.items())
 
-    template_section = 'template:%s' % args.template
-    logging.debug('[%s]', template_section)
-    for opt in config.options(template_section):
-        logging.debug('  %s = %s', opt, config.get(template_section, opt))
-
+    # Updae config dict with which cloud to use.
+    if args.cloud:
+        if args.cloud in config['cloudenvy']['clouds'].keys():
+            config['cloudenvy'].update(
+                {'cloud': ['cloudenvy']['clouds'][args.cloud]})
+    else:
+        config['cloudenvy'].update(
+            {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
     return config
 
 
 def provision(args):
     """Manually provision a remote environment using a userdata script."""
     config = _get_config(args)
-    env = template.Template(args.name, args, config)
-    logging.info('Provisioning environment...')
+    envy = template.Template(config)
+    logging.info('Provisioning %s environment...' %
+        config['project_config']['name'])
 
-    remote_user = args.remote_user or env.remote_user
-    userdata_path = args.userdata or env.userdata
+    remote_user = config['project_config']['remote_user']
+    userdata_path = config['project_config']['userdata_path']
+    remote_userdata_path = '~/provision_script'
+
     logging.info('Using userdata from: %s', userdata_path)
-    local_userdata_loc = args.userdata
-    remote_userdata_loc = '~/userdata'
-    with fabric.api.settings(host_string=env.ip(),
+
+    with fabric.api.settings(host_string=envy.ip(),
                              user=remote_user,
                              forward_agent=True,
                              disable_known_hosts=True):
         for i in range(10):
             try:
-                fabric.operations.put(local_userdata_loc,
-                                      remote_userdata_loc,
+                fabric.operations.put(userdata_path,
+                                      remote_userdata_path,
                                       mode=0755)
                 break
             except fabric.exceptions.NetworkError:
-                time.sleep(1)
+                logging.error("Unable to upload file, trying again in 3 \
+                    seconds.")
+                time.sleep(3)
 
-        fabric.operations.run(remote_userdata_loc)
+        fabric.operations.run(remote_userdata_path)
     logging.info('...done.')
 
 
 def up(args):
     """Create a server and show its IP."""
-    env = template.Template(args.name, args, _get_config(args))
-    if not env.server():
+    config = _get_config(args)
+    envy = template.Template(config)
+    if not envy.server():
         logging.info('Building environment.')
         try:
-            env.build_server()
+            envy.build_server()
         except exceptions.ImageNotFound:
             logging.error('Could not find image.')
             return
         except exceptions.NoIPsAvailable:
             logging.error('Could not find free IP.')
             return
-    if env.ip():
-        print env.ip()
+    if envy.ip():
+        print envy.ip()
     else:
         print 'Environment has no IP.'
 
@@ -171,14 +181,7 @@ def _build_parser():
     parser.add_argument('-v', '--verbosity', action='count',
                         help='increase output verbosity')
     parser.add_argument('-c', '--cloud', action='store',
-                        help='specify which cloud to use',
-                        default='envy')
-    parser.add_argument('-t', '--template', action='store',
-                        help='specify which instance template to use',
-                        default='envy')
-    parser.add_argument('-n', '--name', action='store',
-                        help='specify a name for the instance',
-                        default='envy')
+                        help='specify which cloud to use')
 
     subparsers = parser.add_subparsers(title='Available commands:')
 
@@ -193,8 +196,7 @@ def _build_parser():
         #               specifying each parser
         if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
-                                   help='specify the location of userdata',
-                                   default=CONFIG_DEFAULTS['userdata'])
+                                   help='specify the location of userdata')
         if cmd_name in ('provision'):
             subparser.add_argument('-r', '--remote_user', action='store',
                                    help='remote user to provision',

@@ -8,19 +8,19 @@ from cloudenvy import exceptions
 
 
 class Template(object):
-    def __init__(self, name, args, config):
-        self.name = name
+    def __init__(self, config):
+        self.name = config['project_config']['name']
         self.config = config
-        self.args = args
-        section = 'template:%s' % args.template
-        self.cloud_api = cloud.CloudAPI(args.cloud, self.config)
-        self.image_name = config.get(section, 'image_name')
-        self.flavor_name = config.get(section, 'flavor_name')
-        self.assign_floating_ip = config.get(section, 'assign_floating_ip')
-        self.keypair_name = config.get(section, 'keypair_name')
-        self.keypair_location = config.get(section, 'keypair_location')
-        self.remote_user = config.get(section, 'remote_user')
-        self.userdata = config.get(section, 'userdata')
+        self.user_config = config['cloudenvy']
+        self.project_config = config['project_config']
+
+        self.cloud_api = cloud.CloudAPI(self.config)
+        self.image_name = self.project_config['image_name']
+        self.flavor_name = self.project_config['flavor_name']
+        self.keypair_name = self.user_config['keypair_name']
+        self.keypair_location = self.user_config['keypair_location']
+        self.remote_user = self.project_config['remote_user']
+        self.userdata = self.project_config['userdata_path']
         self._server = None
         self._ip = None
 
@@ -65,8 +65,8 @@ class Template(object):
                                         self.keypair_location)
             build_kwargs['key_name'] = self.keypair_name
 
-        if self.args.provision:
-            userdata_path = self.args.userdata or self.userdata
+        if self.project_config['userdata_path']:
+            userdata_path = self.project_config['userdata_path']
             logging.info('Using userdata from: %s', userdata_path)
             build_kwargs['user_data'] = userdata_path
 

@@ -17,16 +17,17 @@ def not_found(func):
 
 
 class CloudAPI(object):
-    def __init__(self, name, config):
+    def __init__(self, config):
         self._client = None
         self.config = config
-        section = 'cloud:%s' % name
+        self.user_config = config['cloudenvy']
+        self.project_config = config['project_config']
 
         # OpenStack Auth Items
-        self.user = self.config.get(section, 'OS_USERNAME')
-        self.password = self.config.get(section, 'OS_PASSWORD')
-        self.tenant_name = self.config.get(section, 'OS_TENANT_NAME')
-        self.auth_url = self.config.get(section, 'OS_AUTH_URL')
+        self.user = self.user_config['cloud']['os_username']
+        self.password = self.user_config['cloud']['os_password']
+        self.tenant_name = self.user_config['cloud']['os_tenant_name']
+        self.auth_url = self.user_config['cloud']['os_auth_url']
 
     @property
     def client(self):

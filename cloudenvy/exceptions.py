@@ -23,3 +23,7 @@ class FloatingIPAssignFailure(Error):
 
 class NoIPsAvailable(Error):
     pass
+
+
+class UserConfigNotPresent(Error):
+    pass

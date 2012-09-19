@@ -2,3 +2,4 @@
 userdata
 cloudenvy.egg-info
 dist
+*.yml

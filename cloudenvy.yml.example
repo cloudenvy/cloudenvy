@@ -1,0 +1,11 @@
+cloudenvy:
+  keypair_name: foo
+  keypair_location: /Users/foo/.ssh/id_rsa.pub
+  sec_group_name: cloudenvy
+
+  clouds:
+    env4:
+      os_username: username
+      os_password: password
+      os_tenant_name: tenant_name
+      os_auth_url: http://urltokeystoneendpoint:5000/v2.0/
