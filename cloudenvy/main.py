@@ -113,30 +113,33 @@ def up(args):
 
 def snapshot(args, name=None):
     """Create a snapshot of a running server."""
-    env = template.Template(args.name, args, _get_config(args))
-    env.snapshot(name or ('%s-snapshot' % env.name))
+    config = _get_config(args)
+    envy = template.Template(config)
+    envy.snapshot(name or ('%s-snapshot' % envy.name))
 
 
 def ip(args):
     """Show the IP of the current server."""
-    env = template.Template(args.name, args, _get_config(args))
+    config = _get_config(args)
+    envy = template.Template(config)
 
-    if not env.server():
+    if not envy.server():
         logging.error('Environment has not been created.\n'
                       'Try running `envy up` first?')
-    elif env.ip():
-        print env.ip()
+    elif envy.ip():
+        print envy.ip()
     else:
         logging.error('Could not find IP.')
 
 
 def scp(args):
     """SCP Files to your ENVy"""
-    env = template.Template(args.name, args, _get_config(args))
+    config = _get_config(args)
+    envy = template.Template(config)
 
-    if env.ip():
+    if envy.ip():
         remote_user = 'ubuntu'
-        host_string = '%s@%s' % (remote_user, env.ip())
+        host_string = '%s@%s' % (remote_user, envy.ip())
 
         with fabric.api.settings(host_string=host_string):
             fabric.operations.put(args.source, args.target)
@@ -147,25 +150,26 @@ def scp(args):
 def ssh(args):
     """SSH into the current server."""
     config = _get_config(args)
-    env = template.Template(config)
+    envy = template.Template(config)
     remote_user = config['project_config']['remote_user']
-    if env.ip():
+    if envy.ip():
         disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
                                ' -o StrictHostKeyChecking=no')
         fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
                                                   remote_user,
-                                                  env.ip()))
+                                                  envy.ip()))
     else:
         logging.error('Could not find IP.')
 
 
 def destroy(args):
     """Power-off and destroy the current server."""
-    env = template.Template(args.name, args, _get_config(args))
+    config = _get_config(args)
+    envy = template.Template(config)
     logging.info('Triggering environment deletion.')
-    if env.find_server():
-        env.delete_server()
-        while env.find_server():
+    if envy.find_server():
+        envy.delete_server()
+        while envy.find_server():
             logging.info('...waiting for server to be destroyed')
             time.sleep(1)
         logging.info('...done.')
