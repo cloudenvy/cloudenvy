@@ -27,7 +27,7 @@ CONFIG_DEFAULTS = {
 #TODO(jakedahn): clean up this entire method, it's kind of hacky.
 def _get_config(args):
     user_config_path = os.path.expanduser('~/.cloudenvy')
-    project_config_path = './CloudEnvy.yml'
+    project_config_path = './Envyfile'
 
     if os.path.exists(user_config_path):
         user_config = {'cloudenvy': CONFIG_DEFAULTS}
@@ -41,8 +41,8 @@ def _get_config(args):
     if os.path.exists(project_config_path):
         project_config = yaml.load(open(project_config_path))
     else:
-        logging.error("Could not read ./CloudEnvy.yml. Please make sure you \
-            have a CloudEnvy.yml file in your current directory.")
+        logging.error("Could not read ./Envyfile. Please make sure you"
+                      "have an EnvyFile in your current directory.")
         raise exceptions.ProjectConfigNotPresent()
 
     config = dict(project_config.items() + user_config.items())
