@@ -76,12 +76,19 @@ def _get_config(args):
             {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
     # Exits if there are issues with configuration.
     _validate_config(config)
+
     return config
 
 
 def up(args):
     """Create a server and show its IP."""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
     if not envy.server():
         logging.info('Building environment.')
@@ -104,6 +111,12 @@ def up(args):
 def provision(args):
     """Manually provision a remote environment using a userdata script."""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
     logging.info('Provisioning %s environment...' %
                  config['project_config']['name'])
@@ -137,6 +150,12 @@ def provision(args):
 def snapshot(args, name=None):
     """Create a snapshot of a running server."""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
     envy.snapshot(name or ('%s-snapshot' % envy.name))
 
@@ -144,6 +163,12 @@ def snapshot(args, name=None):
 def ip(args):
     """Show the IP of the current server."""
     config = _get_config(args)
+
+     # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
 
     if not envy.server():
@@ -158,6 +183,12 @@ def ip(args):
 def scp(args):
     """SCP Files to your ENVy"""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
 
     if envy.ip():
@@ -173,6 +204,12 @@ def scp(args):
 def ssh(args):
     """SSH into the current server."""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
     remote_user = config['project_config']['remote_user']
     if envy.ip():
@@ -188,6 +225,12 @@ def ssh(args):
 def destroy(args):
     """Power-off and destroy the current server."""
     config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
     envy = Envy(config)
     logging.info('Triggering environment deletion.')
     if envy.find_server():
@@ -222,6 +265,12 @@ def _build_parser():
         # NOTE(termie): add some specific options, if this ever gets too
         #               large we should probably switch to manually
         #               specifying each parser
+        if cmd_name in ('up', 'provision', 'snapshot', 'ip', 'scp', 'ssh',
+                        'destroy'):
+            subparser.add_argument('-n', '--name', action='store',
+                           help='specify custom name for an ENVy',
+                           default='')
+
         if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
                                    help='specify the location of userdata')
