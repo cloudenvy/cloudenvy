@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 import argparse
+import getpass
 import logging
 import os
 import os.path
@@ -15,7 +16,7 @@ from cloudenvy.envy import Envy
 
 
 CONFIG_DEFAULTS = {
-    'keypair_name': os.getlogin(),
+    'keypair_name': getpass.getuser(),
     'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
     'flavor_name': 'm1.small',
     'sec_group_name': 'cloudenvy',
