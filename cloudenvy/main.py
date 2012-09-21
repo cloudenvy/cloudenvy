@@ -24,26 +24,44 @@ CONFIG_DEFAULTS = {
 }
 
 
+def _validate_config(config):
+    for item in ['name', 'flavor_name']:
+        config_item = config['project_config'].get(item)
+        if config_item == None:
+            raise SystemExit('Missing Configuration: Make sure `%s` is set in '
+                             'your project\'s Envyfile')
+
+    # If credentials config is not set, send output to user.
+    for item in ['username', 'password', 'tenant_name', 'auth_url']:
+        config_name = 'os_%s' % item
+        config_item = config['cloudenvy']['cloud'].get(config_name)
+
+        if config_item == None:
+            raise SystemExit('Missing Credentials: Make sure `%s` is set in '
+                             '~/.cloudenvy' % config_name)
+
+
+def _check_config_files(user_config_path, project_config_path):
+    if not os.path.exists(user_config_path):
+        raise SystemExit('Could not read ~/.cloudenvy. Please make sure '
+                         '~/.cloudenvy has the proper configuration.')
+
+    if not os.path.exists(project_config_path):
+        raise SystemExit('Could not read ./Envyfile. Please make sure you'
+                         'have an EnvyFile in your current directory.')
+
+
 #TODO(jakedahn): clean up this entire method, it's kind of hacky.
 def _get_config(args):
     user_config_path = os.path.expanduser('~/.cloudenvy')
     project_config_path = './Envyfile'
 
-    if os.path.exists(user_config_path):
-        user_config = {'cloudenvy': CONFIG_DEFAULTS}
-        user_yaml = yaml.load(open(user_config_path))['cloudenvy']
-        user_config.update({'cloudenvy': user_yaml})
-    else:
-        logging.error("Could not read ~/.cloudenvy. Please make sure \
-            ~/.cloudenvy has the proper configuration.")
-        raise exceptions.UserConfigNotPresent()
+    _check_config_files(user_config_path, project_config_path)
 
-    if os.path.exists(project_config_path):
-        project_config = yaml.load(open(project_config_path))
-    else:
-        logging.error("Could not read ./Envyfile. Please make sure you"
-                      "have an EnvyFile in your current directory.")
-        raise exceptions.ProjectConfigNotPresent()
+    user_config = {'cloudenvy': CONFIG_DEFAULTS}
+    user_yaml = yaml.load(open(user_config_path))['cloudenvy']
+    user_config.update({'cloudenvy': user_yaml})
+    project_config = yaml.load(open(project_config_path))
 
     config = dict(project_config.items() + user_config.items())
 
@@ -55,6 +73,8 @@ def _get_config(args):
     else:
         config['cloudenvy'].update(
             {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
+    # Exits if there are issues with configuration.
+    _validate_config(config)
     return config
 
 
