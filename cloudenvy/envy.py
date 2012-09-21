@@ -30,6 +30,9 @@ class Envy(object):
         self._server = None
         self._ip = None
 
+    def list_servers(self):
+        return self.cloud_api.list_servers()
+
     def find_server(self):
         return self.cloud_api.find_server(self.name)
 

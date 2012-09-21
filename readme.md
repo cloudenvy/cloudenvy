@@ -87,3 +87,21 @@ NOTE: It is highly recommended that you enable SSH Agent Forwarding. The fastest
 Destroy your instance
 
     envy down
+
+## Advanced CloudEnvy
+
+#### Name your ENVys
+
+If desired you can launch multiple ENVys for a single project. This is useful if you want to run an ENVy for development, and a separate ENVy for testing. Your ENVy name will always be prefaced for the project it belongs to, to do this run:
+
+    envy up -n foo #this will result in ProjectName-foo
+
+NOTE: If you choose to do this, you will need to pass the `-n` flag into all of your commands, for example if you want to ssh into the ENVy created above you would have to run:
+
+    envy ssh -n foo
+
+You will quickly lose track of all of the ENVys for your project, so we added a command that will allow you to retrieve each ENVy name in context of your proejct. To do this run:
+
+    envy list
+
+

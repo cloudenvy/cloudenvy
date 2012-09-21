@@ -40,6 +40,9 @@ class CloudAPI(object):
                 self.auth_url)
         return self._client
 
+    def list_servers(self):
+        return self.client.servers.list()
+
     @not_found
     def find_server(self, name):
         return self.client.servers.find(name=name)

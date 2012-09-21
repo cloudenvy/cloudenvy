@@ -81,7 +81,20 @@ def _get_config(args):
     return config
 
 
-def up(args):
+def envy_list(args):
+    """List all ENVys in context of your current project"""
+    config = _get_config(args)
+    envy = Envy(config)
+    foo = envy.list_servers()
+
+    envys = []
+    for server in foo:
+        if len(server.name.split(envy.name)) > 1:
+            envys.append(str(server.name))
+    print "ENVys for your project: %s" % str(envys)
+
+
+def envy_up(args):
     """Create a server and show its IP."""
     config = _get_config(args)
 
@@ -109,7 +122,7 @@ def up(args):
         print 'Environment has no IP.'
 
 
-def provision(args):
+def envy_provision(args):
     """Manually provision a remote environment using a userdata script."""
     config = _get_config(args)
 
@@ -148,7 +161,7 @@ def provision(args):
     logging.info('...done.')
 
 
-def snapshot(args, name=None):
+def envy_snapshot(args, name=None):
     """Create a snapshot of a running server."""
     config = _get_config(args)
 
@@ -161,7 +174,7 @@ def snapshot(args, name=None):
     envy.snapshot(name or ('%s-snapshot' % envy.name))
 
 
-def ip(args):
+def envy_ip(args):
     """Show the IP of the current server."""
     config = _get_config(args)
 
@@ -181,7 +194,7 @@ def ip(args):
         logging.error('Could not find IP.')
 
 
-def scp(args):
+def envy_scp(args):
     """SCP Files to your ENVy"""
     config = _get_config(args)
 
@@ -202,7 +215,7 @@ def scp(args):
         logging.error('Could not find IP to upload file to.')
 
 
-def ssh(args):
+def envy_ssh(args):
     """SSH into the current server."""
     config = _get_config(args)
 
@@ -223,7 +236,7 @@ def ssh(args):
         logging.error('Could not find IP.')
 
 
-def destroy(args):
+def envy_destroy(args):
     """Power-off and destroy the current server."""
     config = _get_config(args)
 
@@ -244,7 +257,8 @@ def destroy(args):
         logging.error('No environment exists.')
 
 
-COMMANDS = [up, provision, snapshot, ip, ssh, destroy, scp]
+COMMANDS = [envy_up, envy_provision, envy_snapshot, envy_ip, envy_ssh,
+            envy_destroy, envy_scp, envy_list]
 
 
 def _build_parser():
@@ -258,7 +272,7 @@ def _build_parser():
     subparsers = parser.add_subparsers(title='Available commands:')
 
     for cmd in COMMANDS:
-        cmd_name = cmd.func_name
+        cmd_name = cmd.func_name.split('envy_')[1]
         helptext = getattr(cmd, '__doc__', '')
         subparser = subparsers.add_parser(cmd_name, help=helptext)
         subparser.set_defaults(func=cmd)
