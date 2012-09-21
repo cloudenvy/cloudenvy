@@ -26,7 +26,8 @@ class CloudAPI(object):
         # OpenStack Auth Items
         self.user = self.user_config['cloud'].get('os_username', None)
         self.password = self.user_config['cloud'].get('os_password', None)
-        self.tenant_name = self.user_config['cloud'].get('os_tenant_name', None)
+        self.tenant_name = self.user_config['cloud'].get('os_tenant_name',
+                                                         None)
         self.auth_url = self.user_config['cloud'].get('os_auth_url', None)
 
     @property

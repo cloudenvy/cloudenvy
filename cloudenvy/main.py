@@ -30,7 +30,7 @@ CONFIG_DEFAULTS = {
 def _validate_config(config):
     for item in ['name', 'flavor_name']:
         config_item = config['project_config'].get(item)
-        if config_item == None:
+        if config_item is None:
             raise SystemExit('Missing Configuration: Make sure `%s` is set in '
                              'your project\'s Envyfile')
 
@@ -39,7 +39,7 @@ def _validate_config(config):
         config_name = 'os_%s' % item
         config_item = config['cloudenvy']['cloud'].get(config_name)
 
-        if config_item == None:
+        if config_item is None:
             raise SystemExit('Missing Credentials: Make sure `%s` is set in '
                              '~/.cloudenvy' % config_name)
 
@@ -64,7 +64,7 @@ def _get_config(args):
     user_config = yaml.load(open(user_config_path))
     project_config = yaml.load(open(project_config_path))
 
-    config = dict(CONFIG_DEFAULTS.items() + project_config.items() \
+    config = dict(CONFIG_DEFAULTS.items() + project_config.items()
                   + user_config.items())
 
     # Updae config dict with which cloud to use.
@@ -115,7 +115,7 @@ def envy_up(args):
             logging.error('Could not find free IP.')
             return
     if envy.auto_provision:
-        provision(args)
+        envy_provision(args)
     if envy.ip():
         print envy.ip()
     else:
@@ -282,9 +282,8 @@ def _build_parser():
         #               specifying each parser
         if cmd_name in ('up', 'provision', 'snapshot', 'ip', 'scp', 'ssh',
                         'destroy'):
-            subparser.add_argument('-n', '--name', action='store',
-                           help='specify custom name for an ENVy',
-                           default='')
+            subparser.add_argument('-n', '--name', action='store', default='',
+                                   help='specify custom name for an ENVy')
 
         if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
