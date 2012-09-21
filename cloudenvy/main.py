@@ -16,12 +16,14 @@ from cloudenvy.envy import Envy
 
 
 CONFIG_DEFAULTS = {
-    'keypair_name': getpass.getuser(),
-    'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
-    'flavor_name': 'm1.small',
-    'sec_group_name': 'cloudenvy',
-    'remote_user': 'ubuntu',
-    'auto_provision': False,
+    'defaults': {
+        'keypair_name': getpass.getuser(),
+        'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
+        'flavor_name': 'm1.small',
+        'sec_group_name': 'cloudenvy',
+        'remote_user': 'ubuntu',
+        'auto_provision': False,
+    }
 }
 
 
@@ -59,12 +61,11 @@ def _get_config(args):
 
     _check_config_files(user_config_path, project_config_path)
 
-    user_config = {'cloudenvy': CONFIG_DEFAULTS}
-    user_yaml = yaml.load(open(user_config_path))['cloudenvy']
-    user_config.update({'cloudenvy': user_yaml})
+    user_config = yaml.load(open(user_config_path))
     project_config = yaml.load(open(project_config_path))
 
-    config = dict(project_config.items() + user_config.items())
+    config = dict(CONFIG_DEFAULTS.items() + project_config.items() \
+                  + user_config.items())
 
     # Updae config dict with which cloud to use.
     if args.cloud:

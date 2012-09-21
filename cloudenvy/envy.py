@@ -13,15 +13,20 @@ class Envy(object):
         self.config = config
         self.user_config = config['cloudenvy']
         self.project_config = config['project_config']
+        self.default_config = config['defaults']
 
         self.cloud_api = cloud.CloudAPI(self.config)
         self.image_name = self.project_config.get('image_name')
         self.flavor_name = self.project_config.get('flavor_name')
-        self.keypair_name = self.user_config.get('keypair_name')
-        self.keypair_location = self.user_config.get('keypair_location')
         self.remote_user = self.project_config.get('remote_user')
         self.provision_script = self.project_config.get('provision_script_path')
         self.auto_provision = self.project_config.get('auto_provision')
+        self.keypair_name = self.user_config.get('keypair_name',
+            self.default_config['keypair_name'])
+        self.keypair_location = self.user_config.get('keypair_location',
+            self.default_config['keypair_location'])
+        self.sec_group_name = self.project_config.get('sec_group_name',
+            self.default_config['sec_group_name'])
         self._server = None
         self._ip = None
 
@@ -56,9 +61,9 @@ class Envy(object):
         }
 
         # TODO(jakedahn): security group name should be pulled from config.
-        logging.info('Using security group: %s', 'cloudenvy')
-        self._ensure_sec_group_exists('cloudenvy')
-        build_kwargs['security_groups'] = ['cloudenvy']
+        logging.info('Using security group: %s', self.sec_group_name)
+        self._ensure_sec_group_exists(self.sec_group_name)
+        build_kwargs['security_groups'] = [self.sec_group_name]
 
         if self.keypair_name is not None:
             logging.info('Using keypair: %s', self.keypair_name)
@@ -111,16 +116,13 @@ class Envy(object):
         logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
-        sec_group_name = 'cloudenvy'
-        sec_group = self.cloud_api.find_security_group(sec_group_name)
+        sec_group = self.cloud_api.find_security_group(name)
 
         if not sec_group:
             try:
-                sec_group = self.cloud_api.create_security_group(
-                    sec_group_name)
+                sec_group = self.cloud_api.create_security_group(name)
             except novaclient.exceptions.BadRequest:
-                logging.error('Security Group "%s" already exists.' %
-                              sec_group_name)
+                logging.error('Security Group "%s" already exists.' % name)
 
         #TODO(jakedahn): rules should be set by configuration.
         rules = [
@@ -136,6 +138,7 @@ class Envy(object):
             logging.debug('... adding rule: %s', rule)
             try:
                 self.cloud_api.create_security_group_rule(sec_group, rule)
+                logging.info('Creating Security Group Rule %s' % str(rule))
             except novaclient.exceptions.BadRequest:
                 logging.error('Security Group Rule "%s" already exists.' %
                               str(rule))
