@@ -9,19 +9,19 @@ from cloudenvy import exceptions
 
 class Envy(object):
     def __init__(self, config):
-        self.name = config['project_config']['name']
+        self.name = config['project_config'].get('name')
         self.config = config
         self.user_config = config['cloudenvy']
         self.project_config = config['project_config']
 
         self.cloud_api = cloud.CloudAPI(self.config)
-        self.image_name = self.project_config['image_name']
-        self.flavor_name = self.project_config['flavor_name']
-        self.keypair_name = self.user_config['keypair_name']
-        self.keypair_location = self.user_config['keypair_location']
-        self.remote_user = self.project_config['remote_user']
-        self.provision_script = self.project_config['provision_script_path']
-        self.auto_provision = self.project_config['auto_provision']
+        self.image_name = self.project_config.get('image_name')
+        self.flavor_name = self.project_config.get('flavor_name')
+        self.keypair_name = self.user_config.get('keypair_name')
+        self.keypair_location = self.user_config.get('keypair_location')
+        self.remote_user = self.project_config.get('remote_user')
+        self.provision_script = self.project_config.get('provision_script_path')
+        self.auto_provision = self.project_config.get('auto_provision')
         self._server = None
         self._ip = None
 
