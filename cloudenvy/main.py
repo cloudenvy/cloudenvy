@@ -135,8 +135,18 @@ def envy_provision(args):
     logging.info('Provisioning %s environment...' %
                  config['project_config']['name'])
 
+    if args.remote_user:
+        config['project_config']['remote_user'] = args.remote_user
+    if args.userdata:
+        config['project_config']['provision_script_path'] = args.userdata
+
     remote_user = config['project_config']['remote_user']
-    provision_script_path = config['project_config']['provision_script_path']
+    try:
+        provision_script_path = config['project_config']['provision_script_path']
+    except KeyError:
+        raise SystemExit('Please specify which provision script should be used'
+                         ' by passing in `-u` to the provision command, or by '
+                         'defining `provision_script_path` in ./Envyfile')
     remote_provision_script_path = '~/provision_script'
 
     logging.info('Using userdata from: %s', provision_script_path)
