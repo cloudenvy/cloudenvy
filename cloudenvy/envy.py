@@ -19,6 +19,7 @@ class Envy(object):
         self.image_name = self.project_config.get('image_name')
         self.flavor_name = self.project_config.get('flavor_name')
         self.remote_user = self.project_config.get('remote_user')
+        self.auto_provision = self.default_config.get('auto_provision', False)
 
         self.keypair_name = self.user_config.get('keypair_name',
             self.default_config['keypair_name'])
