@@ -10,7 +10,8 @@ config = dict(
     description='Fast provisioning on openstack clouds.',
     author='Brian Waldon',
     author_email='bcwaldon@gmail.com',
-    install_requires=['fabric', 'python-novaclient', 'pyyaml'],
+    install_requires=['fabric', 'python-novaclient', 'pyyaml',
+                      'python-glanceclient'],
     packages=['cloudenvy'],
     entry_points={
         'console_scripts': [
