@@ -5,6 +5,8 @@ import getpass
 import logging
 import os
 import os.path
+import tarfile
+import tempfile
 import time
 import yaml
 
@@ -224,6 +226,41 @@ def envy_scp(args):
     else:
         logging.error('Could not find IP to upload file to.')
 
+def envy_dotfiles(args):
+    """Upload user dotfiles from local machine."""
+    config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
+    envy = Envy(config)
+
+    if envy.ip():
+        host_string = '%s@%s' % (envy.remote_user, envy.ip())
+
+        temp_tar = tempfile.NamedTemporaryFile(delete=True)
+
+        with fabric.api.settings(host_string=host_string):
+            dotfiles = ['.vimrc', '.gitconfig', '.gitignore',
+                        '.screenrc']
+
+            with tarfile.open(temp_tar.name, 'w') as archive:
+                for dotfile in dotfiles:
+                    path = os.path.expanduser('~/%s' % dotfile)
+                    if os.path.exists(path):
+                        tarinfo = tarfile.TarInfo(name=dotfile)
+                        tarinfo.mtime = time.time()
+                        tarinfo.mode = 0755
+                        archive.addfile(tarinfo, fileobj=open(path))
+
+            fabric.operations.put(temp_tar, '~/dotfiles.tar')
+            fabric.operations.run('tar -xvf ~/dotfiles.tar')
+    else:
+        logging.error('Could not find IP to upload file to.')
+
 
 def envy_ssh(args):
     """SSH into the current server."""
@@ -268,7 +305,7 @@ def envy_destroy(args):
 
 
 COMMANDS = [envy_up, envy_provision, envy_snapshot, envy_ip, envy_ssh,
-            envy_destroy, envy_scp, envy_list]
+            envy_destroy, envy_scp, envy_list, envy_dotfiles]
 
 
 def _build_parser():
@@ -291,7 +328,7 @@ def _build_parser():
         #               large we should probably switch to manually
         #               specifying each parser
         if cmd_name in ('up', 'provision', 'snapshot', 'ip', 'scp', 'ssh',
-                        'destroy'):
+                        'destroy', 'dotfiles'):
             subparser.add_argument('-n', '--name', action='store', default='',
                                    help='specify custom name for an ENVy')
 
