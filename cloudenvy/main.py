@@ -228,6 +228,41 @@ def envy_scp(args):
     else:
         logging.error('Could not find IP to upload file to.')
 
+def envy_dotfiles(args):
+    """Upload user dotfiles from local machine."""
+    config = _get_config(args)
+
+    # if user defines -n in cli, append name to project name.
+
+    if args.name:
+        config['project_config']['name'] = '%s-%s' % (
+            config['project_config']['name'], args.name)
+
+    envy = Envy(config)
+
+    if envy.ip():
+        host_string = '%s@%s' % (envy.remote_user, envy.ip())
+
+        temp_tar = tempfile.NamedTemporaryFile(delete=True)
+
+        with fabric.api.settings(host_string=host_string):
+            dotfiles = ['.vimrc', '.gitconfig', '.gitignore',
+                        '.screenrc']
+
+            with tarfile.open(temp_tar.name, 'w') as archive:
+                for dotfile in dotfiles:
+                    path = os.path.expanduser('~/%s' % dotfile)
+                    if os.path.exists(path):
+                        tarinfo = tarfile.TarInfo(name=dotfile)
+                        tarinfo.mtime = time.time()
+                        tarinfo.mode = 0755
+                        archive.addfile(tarinfo, fileobj=open(path))
+
+            fabric.operations.put(temp_tar, '~/dotfiles.tar')
+            fabric.operations.run('tar -xvf ~/dotfiles.tar')
+    else:
+        logging.error('Could not find IP to upload file to.')
+
 
 def envy_dotfiles(args):
     """Upload user dotfiles from local machine."""
