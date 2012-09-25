@@ -86,7 +86,7 @@ NOTE: It is highly recommended that you enable SSH Agent Forwarding. The fastest
 
 Destroy your instance
 
-    envy down
+    envy destroy
 
 ## Advanced CloudEnvy
 
@@ -104,4 +104,23 @@ You will quickly lose track of all of the ENVys for your project, so we added a 
 
     envy list
 
+NOTE: This will likely change, as CloudEnvy gets smarter in how it tracks instances, for example we should probably be using server metadata to track if an instance is from CloudEnvy.
+
+#### Passing in your user configuration (dotfiles)
+
+You can pass in basic dotfiles by running:
+
+    envy dotfiles
+
+This defaults to uploading the following files `.vimrc, .gitconfig, .gitignore, .screenrc`. If you would like to pass in a custom set of dotfiles, you can specify them like so
+
+    envy dotfiles -f '.vimrc, .gitconfig'
+
+NOTE: The custom dotfiles must be in a comma separated list, and all of them in a single set of quotes.
+
+#### Simple file uploading
+
+You can upload files to your ENVy via SFTP by running:
+
+    envy scp ~/cat-photo.jpg ~/ZOMGKITTY.jpg
 

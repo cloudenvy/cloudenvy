@@ -25,6 +25,7 @@ CONFIG_DEFAULTS = {
         'sec_group_name': 'cloudenvy',
         'remote_user': 'ubuntu',
         'auto_provision': False,
+        'dotfiles': '.vimrc, .gitconfig, .gitignore, .screenrc'
     }
 }
 
@@ -144,7 +145,8 @@ def envy_provision(args):
 
     remote_user = config['project_config']['remote_user']
     try:
-        provision_script_path = config['project_config']['provision_script_path']
+        project_config = config['project_config']
+        provision_script_path = project_config['provision_script_path']
     except KeyError:
         raise SystemExit('Please specify which provision script should be used'
                          ' by passing in `-u` to the provision command, or by '
@@ -226,6 +228,7 @@ def envy_scp(args):
     else:
         logging.error('Could not find IP to upload file to.')
 
+
 def envy_dotfiles(args):
     """Upload user dotfiles from local machine."""
     config = _get_config(args)
@@ -244,17 +247,17 @@ def envy_dotfiles(args):
         temp_tar = tempfile.NamedTemporaryFile(delete=True)
 
         with fabric.api.settings(host_string=host_string):
-            dotfiles = ['.vimrc', '.gitconfig', '.gitignore',
-                        '.screenrc']
+            if args.files:
+                dotfiles = args.files.split(', ')
+            else:
+                dotfiles = config['defaults']['dotfiles'].split(', ')
 
             with tarfile.open(temp_tar.name, 'w') as archive:
                 for dotfile in dotfiles:
                     path = os.path.expanduser('~/%s' % dotfile)
                     if os.path.exists(path):
-                        tarinfo = tarfile.TarInfo(name=dotfile)
-                        tarinfo.mtime = time.time()
-                        tarinfo.mode = 0755
-                        archive.addfile(tarinfo, fileobj=open(path))
+                        if not os.path.islink(path):
+                            archive.add(path, arcname=dotfile)
 
             fabric.operations.put(temp_tar, '~/dotfiles.tar')
             fabric.operations.run('tar -xvf ~/dotfiles.tar')
@@ -347,6 +350,10 @@ def _build_parser():
             subparser.add_argument('source')
             subparser.add_argument('target')
 
+        if cmd_name in ('dotfiles'):
+            subparser.add_argument('-f', '--files', action='store',
+                                   help='define which dotfiles to upload '
+                                        '(comma space separated)')
     return parser
 
 
