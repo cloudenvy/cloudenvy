@@ -40,7 +40,7 @@ CONFIG_DEFAULTS = {
 
 
 def _validate_config(config):
-    for item in ['name', 'flavor_name']:
+    for item in ['name', 'flavor_name', 'image_name']:
         config_item = config['project_config'].get(item)
         if config_item is None:
             raise SystemExit('Missing Configuration: Make sure `%s` is set in '
