@@ -44,7 +44,7 @@ def _validate_config(config):
         config_item = config['project_config'].get(item)
         if config_item is None:
             raise SystemExit('Missing Configuration: Make sure `%s` is set in '
-                             'your project\'s Envyfile')
+                             'your project\'s Envyfile' % item)
 
     # If credentials config is not set, send output to user.
     for item in ['username', 'password', 'tenant_name', 'auth_url']:
