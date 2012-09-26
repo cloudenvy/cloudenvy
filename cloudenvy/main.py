@@ -228,6 +228,7 @@ def envy_scp(args):
     else:
         logging.error('Could not find IP to upload file to.')
 
+
 def envy_dotfiles(args):
     """Upload user dotfiles from local machine."""
     config = _get_config(args)
