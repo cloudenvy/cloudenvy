@@ -127,23 +127,19 @@ class Envy(object):
             except novaclient.exceptions.BadRequest:
                 logging.error('Security Group "%s" already exists.' % name)
 
-        #TODO(jakedahn): rules should be set by configuration.
-        rules = [
-            ('icmp', -1, -1, '0.0.0.0/0'),
-            ('tcp', 22, 22, '0.0.0.0/0'),
-            ('tcp', 443, 443, '0.0.0.0/0'),
-            ('tcp', 80, 80, '0.0.0.0/0'),
-            ('tcp', 8080, 8080, '0.0.0.0/0'),
-            ('tcp', 5000, 5000, '0.0.0.0/0'),
-            ('tcp', 9292, 9292, '0.0.0.0/0'),
-        ]
+        if 'sec_groups' in self.project_config:
+            rules = [tuple(rule.split(', ')) for rule in
+                     self.project_config['sec_groups']]
+        else:
+            rules = [tuple(rule.split(', ')) for rule in
+                     self.default_config['sec_groups']]
         for rule in rules:
             logging.debug('... adding rule: %s', rule)
             try:
-                self.cloud_api.create_security_group_rule(sec_group, rule)
                 logging.info('Creating Security Group Rule %s' % str(rule))
+                self.cloud_api.create_security_group_rule(sec_group, rule)
             except novaclient.exceptions.BadRequest:
-                logging.error('Security Group Rule "%s" already exists.' %
+                logging.info('Security Group Rule "%s" already exists.' %
                               str(rule))
         logging.info('...done.')
 

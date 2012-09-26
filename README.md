@@ -124,3 +124,15 @@ You can upload files to your ENVy via SFTP by running:
 
     envy scp ~/cat-photo.jpg ~/ZOMGKITTY.jpg
 
+#### Defining custom security groups
+
+By default CloudEnvy opens ports `22, 443, 80, 8080, 5000, and 9292`. These ports are generally useful for OpenStack development, but if you have other requirements, or just don't like to have empty open ports you can define them in your Envyfile
+
+To add custom security groups you can put define them in your Envyfile following the format below: 
+
+      sec_groups: [
+        'icmp, -1, -1, 0.0.0.0/0', 
+        'tcp, 22, 22, 0.0.0.0/0',
+        'tcp, 80, 80, 0.0.0.0/0',
+        'tcp, 3000, 3000, 0.0.0.0/0'
+      ]
