@@ -1,9 +1,6 @@
 cloudenvy:
-  keypair_name: foo #optional - defaults to your local username
-  keypair_location: /Users/foo/.ssh/id_rsa.pub #optional - defaults to ~/.ssh/id_rsa.pub
-
   clouds:
-    env4:
+    cloud01:
       os_username: username
       os_password: password
       os_tenant_name: tenant_name

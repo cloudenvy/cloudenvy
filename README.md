@@ -21,28 +21,24 @@ Use setup.py to install cloudenvy and the dependencies:
 You must set your user options in ~/.cloudenvy. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
 
     cloudenvy:
-      keypair_name: localuser # optional - defaults to your username
-      keypair_location: /Users/localuser/.ssh/id_rsa.pub # optional - defaults to ~/.ssh/id_rsa.pub
-      sec_group_name: cloudenvy
-
       clouds:
-        envrionment1:
+        cloud01:
           os_username: username
           os_password: password
           os_tenant_name: tenant_name
-          os_auth_url: http://urltokeystoneendpoint.com:5000/v2.0/
+          os_auth_url: http://urltokeystoneendpoint:5000/v2.0/
 
 ### Project Config
 
 Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at the root of your project.
 
     project_config:
-      name: foo
-      image_name: Ubuntu 11.10
-      remote_user: ubuntu
-      flavor_name: m1.medium
-      provision_script_path: '/Users/jakedahn/Desktop/provision_script' # optional
-      auto_provision: True # optional - defaults to False.
+      name: foo #required
+      image_name: Ubuntu 11.10 cloudimg amd64 #required
+      remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
+      flavor_name: m1.large #optional - defaults to `m1.small`
+      provision_script_path: './provision_script.sh' #optional - defaults to None
+      auto_provision: True #optional - defaults to False, and requires the presence of the `provision_script_path` setting
 
 
 ## Usage
