@@ -74,7 +74,7 @@ def _get_config(args):
     if args.cloud:
         if args.cloud in config['cloudenvy']['clouds'].keys():
             config['cloudenvy'].update(
-                {'cloud': ['cloudenvy']['clouds'][args.cloud]})
+                {'cloud': config['cloudenvy']['clouds'][args.cloud]})
     else:
         config['cloudenvy'].update(
             {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
@@ -369,6 +369,8 @@ def _build_parser():
                         'destroy', 'dotfiles'):
             subparser.add_argument('-n', '--name', action='store', default='',
                                    help='specify custom name for an ENVy')
+            subparser.add_argument('-c', '--cloud', action='store', default='',
+                                   help='specify which cloud to use')
 
         if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
