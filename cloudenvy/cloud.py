@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import functools
 import exceptions
+import logging
 
 import novaclient.exceptions
 import novaclient.client
@@ -72,8 +73,25 @@ class CloudAPI(object):
         server.add_floating_ip(ip)
 
     @not_found
-    def find_image(self, name):
-        return self.client.images.find(name=name)
+    def find_image(self, name, id=None):
+        if id:
+            try:
+                image = self.client.images.get(id)
+            except novaclient.exceptions.NotFound:
+                logging.error('Image with the id of `%s` Not Found' % id)
+                exit()
+        else:
+            try:
+                image = self.client.images.find(name=name)
+            except novaclient.exceptions.NotFound:
+                logging.error('Image `%s` Not Found' % name)
+                exit()
+            except novaclient.exceptions.NoUniqueMatch:
+                logging.error('There are multiple images named `%s` stored in '
+                              'Glance. To continue you should define '
+                              '`image_id` in your project\'s Envyfile.' % name)
+                exit()
+        return image
 
     @not_found
     def get_image(self, image_id):

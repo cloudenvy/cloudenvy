@@ -17,6 +17,7 @@ class Envy(object):
 
         self.cloud_api = cloud.CloudAPI(self.config)
         self.image_name = self.project_config.get('image_name')
+        self.image_id = self.project_config.get('image_id', None)
         self.flavor_name = self.project_config.get('flavor_name')
         self.remote_user = self.project_config.get('remote_user')
         self.auto_provision = self.default_config.get('auto_provision', False)
@@ -51,12 +52,8 @@ class Envy(object):
         return self._ip
 
     def build_server(self):
-        image = self.cloud_api.find_image(self.image_name)
-        if not image:
-            raise exceptions.ImageNotFound()
-
+        image = self.cloud_api.find_image(self.image_name, id=self.image_id)
         flavor = self.cloud_api.find_flavor(self.flavor_name)
-
         build_kwargs = {
             'name': self.name,
             'image': image,
