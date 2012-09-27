@@ -73,7 +73,7 @@ class CloudAPI(object):
 
     @not_found
     def find_image(self, name):
-        return self.client.images.get(name)
+        return self.client.images.find(name=name)
 
     @not_found
     def get_image(self, image_id):
