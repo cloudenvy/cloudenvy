@@ -126,7 +126,7 @@ def envy_up(args):
         except exceptions.NoIPsAvailable:
             logging.error('Could not find free IP.')
             return
-    if envy.auto_provision:
+    if envy.auto_provision and not args.manual_provision:
         envy_provision(args)
     if envy.ip():
         print envy.ip()
@@ -142,20 +142,15 @@ def envy_provision(args):
     if args.name:
         config['project_config']['name'] = '%s-%s' % (
             config['project_config']['name'], args.name)
-
-    envy = Envy(config)
-    logging.info('Provisioning %s environment...' %
-                 config['project_config']['name'])
-
-    if args.remote_user:
-        config['project_config']['remote_user'] = args.remote_user
     if args.userdata:
         config['project_config']['provision_script_path'] = args.userdata
 
-    remote_user = config['project_config']['remote_user']
+    envy = Envy(config)
+    logging.info('Provisioning %s environment...' %
+                 envy.project_config['name'])
+
     try:
-        project_config = config['project_config']
-        provision_script_path = project_config['provision_script_path']
+        provision_script_path = envy.project_config['userdata_path']
     except KeyError:
         raise SystemExit('Please specify which provision script should be used'
                          ' by passing in `-u` to the provision command, or by '
@@ -165,11 +160,13 @@ def envy_provision(args):
     logging.info('Using userdata from: %s', provision_script_path)
 
     with fabric.api.settings(host_string=envy.ip(),
-                             user=remote_user,
+                             user=envy.remote_user,
                              forward_agent=True,
                              disable_known_hosts=True):
         for i in range(12):
             try:
+                fabric.operations.run('if [ -e "$HOME/provision_script" ]; '
+                                      'then rm ~/provision_script; fi')
                 fabric.operations.put(provision_script_path,
                                       remote_provision_script_path,
                                       mode=0755)
@@ -349,14 +346,17 @@ def _build_parser():
         if cmd_name in ('provision', 'up'):
             subparser.add_argument('-u', '--userdata', action='store',
                                    help='specify the location of userdata')
-        if cmd_name in ('provision'):
-            subparser.add_argument('-r', '--remote_user', action='store',
-                                   help='remote user to provision',
-                                   default=None)
+
         if cmd_name in ('up'):
             subparser.add_argument('-p', '--provision', action='store_true',
                                    help='supply userdata at server creation',
                                    default=False)
+            subparser.add_argument('--manual-provision', action='store_true',
+                                   help='Override `auto_provision` setting in '
+                                   'your Envyfile to not auto provision')
+            subparser.add_argument('--auto-provision', action='store_true',
+                                   help='Override `auto_provision` setting in '
+                                   'your Envyfile to auto provision')
         if cmd_name in ('scp'):
             subparser.add_argument('source')
             subparser.add_argument('target')
