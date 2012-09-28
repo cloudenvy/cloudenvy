@@ -5,7 +5,7 @@ except:
 
 config = dict(
     name='cloudenvy',
-    version='0.0.2',
+    version='0.1.0',
     url='https://github.com/bcwaldon/cloudenvy',
     description='Fast provisioning on openstack clouds.',
     author='Brian Waldon',
