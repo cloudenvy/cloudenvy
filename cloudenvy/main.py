@@ -46,6 +46,11 @@ def _validate_config(config):
             raise SystemExit('Missing Configuration: Make sure `%s` is set in '
                              'your project\'s Envyfile' % item)
 
+    if 'auto_provision' in config['project_config']:
+        config_item = config['project_config'].get('provision_script_path')
+        if config_item is None:
+            raise SystemExit('Missing Configuration: Make sure `%s` is set in '
+                             'your project\'s envy file')
     # If credentials config is not set, send output to user.
     for item in ['username', 'password', 'tenant_name', 'auth_url']:
         config_name = 'os_%s' % item
@@ -150,7 +155,7 @@ def envy_provision(args):
                  envy.project_config['name'])
 
     try:
-        provision_script_path = envy.project_config['userdata_path']
+        provision_script_path = envy.project_config['provision_script_path']
     except KeyError:
         raise SystemExit('Please specify which provision script should be used'
                          ' by passing in `-u` to the provision command, or by '
