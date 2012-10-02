@@ -1,20 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 import argparse
-import getpass
-import logging
-import os
-import os.path
-import tarfile
-import tempfile
-import time
-import yaml
-
-import fabric.api
-import fabric.operations
-
-from cloudenvy import exceptions
-from cloudenvy.envy import Envy
 
 from cloudenvy.config import EnvyConfig
 
