@@ -44,11 +44,14 @@ class EnvyConfig(object):
         config = dict(CONFIG_DEFAULTS.items() + project_config.items()
                       + user_config.items())
 
-        if args.name:
-            config['project_config']['name'] = '%s-%s' % (
-                config['project_config']['name'], args.name)
-        if args.userdata:
-            config['project_config']['provision_script_path'] = args.userdata
+        if 'name' in args:
+            if args.name:
+                config['project_config']['name'] = '%s-%s' % (
+                    config['project_config']['name'], args.name)
+        if 'userdata' in args:
+            if args.userdata:
+                config['project_config']['provision_script_path'] = \
+                                                                  args.userdata
 
         #TODO(jakedahn): I think this is stupid, there is probably a better way
         # Updae config dict with which cloud to use.

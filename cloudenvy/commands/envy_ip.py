@@ -3,7 +3,7 @@ import logging
 from cloudenvy.envy import Envy
 
 
-class EnvyIp(object):
+class EnvyIP(object):
     """Get the IP of an ENVy"""
 
     def __init__(self, argparser):

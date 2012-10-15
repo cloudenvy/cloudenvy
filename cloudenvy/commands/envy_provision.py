@@ -20,8 +20,6 @@ class EnvyProvision(object):
 
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='specify custom name for an ENVy')
-        subparser.add_argument('-c', '--cloud', action='store', default='',
-                               help='specify which cloud to use')
         subparser.add_argument('-u', '--userdata', action='store',
                                help='specify the location of userdata')
         return subparser
