@@ -51,7 +51,7 @@ class EnvyConfig(object):
         if 'userdata' in args:
             if args.userdata:
                 config['project_config']['provision_script_path'] = \
-                                                                  args.userdata
+                    args.userdata
 
         #TODO(jakedahn): I think this is stupid, there is probably a better way
         # Updae config dict with which cloud to use.
