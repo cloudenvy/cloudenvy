@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 import argparse
+import logging
 
 from cloudenvy.config import EnvyConfig
 
@@ -43,5 +44,14 @@ def main():
     args = parser.parse_args()
 
     config = EnvyConfig(args).get_config()
+
+    if args.verbosity == 3:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger('novaclient').setLevel(logging.DEBUG)
+    elif args.verbosity == 2:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger('novaclient').setLevel(logging.INFO)
+    elif args.verbosity == 1:
+        logging.getLogger().setLevel(logging.INFO)
 
     args.func(config, args)
