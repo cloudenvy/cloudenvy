@@ -23,11 +23,14 @@ class Envy(object):
         self.auto_provision = self.project_config.get('auto_provision', False)
 
         self.keypair_name = self.user_config.get('keypair_name',
-            self.default_config['keypair_name'])
+                                                 self.default_config[
+                                                 'keypair_name'])
         self.keypair_location = self.user_config.get('keypair_location',
-            self.default_config['keypair_location'])
+                                                     self.default_config[
+                                                     'keypair_location'])
         self.sec_group_name = self.project_config.get('sec_group_name',
-            self.default_config['sec_group_name'])
+                                                      self.default_config[
+                                                      'sec_group_name'])
         self._server = None
         self._ip = None
 
@@ -137,7 +140,7 @@ class Envy(object):
                 self.cloud_api.create_security_group_rule(sec_group, rule)
             except novaclient.exceptions.BadRequest:
                 logging.info('Security Group Rule "%s" already exists.' %
-                              str(rule))
+                             str(rule))
         logging.info('...done.')
 
     def _ensure_keypair_exists(self, name, pubkey_location):
