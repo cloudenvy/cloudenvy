@@ -12,8 +12,6 @@ class EnvyList(object):
         subparser.set_defaults(func=self.run)
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='specify custom name for an ENVy')
-        subparser.add_argument('-u', '--userdata', action='store',
-                               help='specify the location of userdata')
 
         return subparser
 
