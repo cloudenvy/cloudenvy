@@ -38,8 +38,10 @@ Much like Vagrant, each ENVy must have a corresponding configuration file in the
       image_id: 47101ccb-2685-42c4-9a32-5aeaaf84862 # use this if there is a chance that there will be more than a single image with the same name.
       remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
       flavor_name: m1.large #optional - defaults to `m1.small`
-      provision_script_path: './provision_script.sh' #optional - defaults to None
-      auto_provision: True #optional - defaults to False, and requires the presence of the `provision_script_path` setting
+      provision_scripts:
+        - ~/Desktop/provision_scripts/foo.sh
+        - ~/Desktop/provision_scripts/bar.sh
+        - ~/Desktop/provision_scripts/baz.sh
 
 
 ## Usage
@@ -50,17 +52,23 @@ Launch a bare instance
     
     envy up
 
-NOTE: If your project configuration specifies ```auto_provision: True``` then ```envy up``` will run the provision script once the instance is built and running.
+NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision your ENVy you must pass the `--no-provision` flag like so:
+
+    envy up --no-provision
 
 NOTE: Use the ```-v``` flag to get verbose logging output. Example: ```envy -v up```
 
 ### Provision
 
-To provision a script, you must set the path to the bash file you wish to run on your instance.
+To provision a script, you must set the path to one or more shell scripts (in the future these can be any type of excecutable files).
 
     envy provision
 
-NOTE: Provisioning an ENVy does not use the ```OpenStack CloudConfigDrive```. Instead it uploads the provision script, and runs it using Fabric. This allows you to perform operations which usually require ssh authentication.
+If you are attempting to debug provision scripts, you can pass in several scripts, which will be run in order, like so:
+
+    envy provision --scripts ~/Desktop/scripts/foo.sh ~/Desktop/scripts/bar.sh
+
+NOTE: Provisioning an ENVy does not use the ```OpenStack CloudConfigDrive```. Instead it uploads the provision script, and runs it using Fabric. This allows you to perform operations which require ssh authentication (such as a git clone from a private repository)
 
 
 ### Get your ENVy IP

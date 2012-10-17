@@ -17,19 +17,10 @@ class EnvyUp(object):
 
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='specify custom name for an ENVy')
-        subparser.add_argument('-c', '--cloud', action='store', default='',
-                               help='specify which cloud to use')
-        subparser.add_argument('-u', '--userdata', action='store',
-                               help='specify the location of userdata')
-        subparser.add_argument('-p', '--provision', action='store_true',
-                               help='supply userdata at server creation',
-                               default=False)
-        subparser.add_argument('--manual-provision', action='store_true',
-                               help='Override `auto_provision` setting in '
-                               'your Envyfile to not auto provision')
-        subparser.add_argument('--auto-provision', action='store_true',
-                               help='Override `auto_provision` setting in '
-                               'your Envyfile to auto provision')
+        subparser.add_argument('-s', '--scripts', default=None, nargs='*',
+                               help='specify one or more provision scripts')
+        subparser.add_argument('--no-provision', action='store_true',
+                               help='prevents provision scripts from running')
         return subparser
 
     def run(self, config, args):
@@ -45,8 +36,16 @@ class EnvyUp(object):
             except exceptions.NoIPsAvailable:
                 logging.error('Could not find free IP.')
                 return
-        if envy.auto_provision and not args.manual_provision:
-            EnvyProvision().run(config, args)
+        if not args.no_provision and 'provision_scripts' in \
+                                     envy.project_config:
+            try:
+                EnvyProvision().run(config, args)
+            except SystemExit:
+                raise SystemExit('You have not specified any provision '
+                                 'scripts in your Envyfile. '
+                                 'If you would like to run your ENVy '
+                                 'without a provision script; use the '
+                                 '`--no-provision` command line flag.')
         if envy.ip():
             print envy.ip()
         else:
