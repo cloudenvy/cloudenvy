@@ -40,11 +40,14 @@ class EnvyProvision(object):
             elif 'provision_scripts' in envy.project_config:
                 scripts = [os.path.expanduser(script) for script in
                            envy.project_config['provision_scripts']]
+            elif 'provision_script_path' in envy.project_config:
+                provision_script = envy.project_config['provision_script_path']
+                scripts = [os.path.expanduser(provision_script)]
             else:
                 raise SystemExit('Please specify the path to your provision '
                                  'script(s) by either using the `--scripts` '
-                                 'flag, or by defining the `provision_scripts` '
-                                 'config option in your Envyfile')
+                                 'flag, or by defining the `provision_scripts`'
+                                 ' config option in your Envyfile')
 
             for script in scripts:
                 logging.info('Running provision script from: %s', script)

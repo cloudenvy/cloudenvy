@@ -42,10 +42,10 @@ class EnvyUp(object):
                 EnvyProvision().run(config, args)
             except SystemExit:
                 raise SystemExit('You have not specified any provision '
-                               'scripts in your Envyfile. '
-                               'If you would like to run your ENVy '
-                               'without a provision script; use the '
-                               '`--no-provision` command line flag.')
+                                 'scripts in your Envyfile. '
+                                 'If you would like to run your ENVy '
+                                 'without a provision script; use the '
+                                 '`--no-provision` command line flag.')
         if envy.ip():
             print envy.ip()
         else:
