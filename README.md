@@ -52,7 +52,7 @@ Launch a bare instance
     
     envy up
 
-NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision you must pass in the `--no-provision` flag like so:
+NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision your ENVy you must pass the `--no-provision` flag like so:
 
     envy up --no-provision
 

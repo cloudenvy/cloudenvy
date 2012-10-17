@@ -36,7 +36,8 @@ class EnvyUp(object):
             except exceptions.NoIPsAvailable:
                 logging.error('Could not find free IP.')
                 return
-        if not args.no_provision:
+        if not args.no_provision and 'provision_scripts' in \
+                                     envy.project_config:
             try:
                 EnvyProvision().run(config, args)
             except SystemExit:
