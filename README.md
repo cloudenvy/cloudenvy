@@ -87,6 +87,10 @@ NOTE: It is highly recommended that you enable SSH Agent Forwarding. The fastest
     ssh-add
 
 
+### Run a command on your ENVy
+
+    envy run "ls ~/foo"
+
 ### Destroy your ENVy
 
 Destroy your instance
