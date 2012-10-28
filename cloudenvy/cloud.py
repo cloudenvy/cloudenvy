@@ -39,7 +39,8 @@ class CloudAPI(object):
                 self.user,
                 self.password,
                 self.tenant_name,
-                self.auth_url)
+                self.auth_url,
+                no_cache=True)
         return self._client
 
     def list_servers(self):
