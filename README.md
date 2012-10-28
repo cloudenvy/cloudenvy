@@ -18,7 +18,7 @@ Use setup.py to install cloudenvy and the dependencies:
 ## Configuration
 
 ### User Config
-You must set your user options in ~/.cloudenvy. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
+You must set your user options in ~/.cloudenvy.yml. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
 
     cloudenvy:
       clouds:
@@ -30,7 +30,7 @@ You must set your user options in ~/.cloudenvy. User options include a few gener
 
 ### Project Config
 
-Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at the root of your project.
+Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at `Envyfile.yml` the root of your project.
 
     project_config:
       name: foo #required
@@ -49,7 +49,7 @@ Much like Vagrant, each ENVy must have a corresponding configuration file in the
 ### Launch
 
 Launch a bare instance
-    
+
     envy up
 
 NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision your ENVy you must pass the `--no-provision` flag like so:
@@ -133,10 +133,10 @@ You can upload files to your ENVy via SFTP by running:
 
 By default CloudEnvy opens ports `22, 443, 80, 8080, 5000, and 9292`. These ports are generally useful for OpenStack development, but if you have other requirements, or just don't like to have empty open ports you can define them in your Envyfile
 
-To add custom security groups you can put define them in your Envyfile following the format below: 
+To add custom security groups you can put define them in your Envyfile following the format below:
 
       sec_groups: [
-        'icmp, -1, -1, 0.0.0.0/0', 
+        'icmp, -1, -1, 0.0.0.0/0',
         'tcp, 22, 22, 0.0.0.0/0',
         'tcp, 80, 80, 0.0.0.0/0',
         'tcp, 3000, 3000, 0.0.0.0/0'
