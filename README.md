@@ -34,7 +34,7 @@ Much like Vagrant, each ENVy must have a corresponding configuration file in the
 
     project_config:
       name: foo #required
-      image_name: Ubuntu 11.10 cloudimg amd64 #required
+      image: Ubuntu 11.10 cloudimg amd64 #required - you can use either an image name or id - we recommend using image IDs
       image_id: 47101ccb-2685-42c4-9a32-5aeaaf84862 # use this if there is a chance that there will be more than a single image with the same name.
       remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
       flavor_name: m1.large #optional - defaults to `m1.small`
@@ -43,13 +43,14 @@ Much like Vagrant, each ENVy must have a corresponding configuration file in the
         - ~/Desktop/provision_scripts/bar.sh
         - ~/Desktop/provision_scripts/baz.sh
 
+NOTE: For the `image` property you can use either an image name or an id. If you use a development cloud where ids change frequently its probably better to use the image name, in all other cases we recommend you use an image id... but it is your call.
 
 ## Usage
 
 ### Launch
 
 Launch a bare instance
-    
+
     envy up
 
 NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision your ENVy you must pass the `--no-provision` flag like so:
@@ -133,10 +134,10 @@ You can upload files to your ENVy via SFTP by running:
 
 By default CloudEnvy opens ports `22, 443, 80, 8080, 5000, and 9292`. These ports are generally useful for OpenStack development, but if you have other requirements, or just don't like to have empty open ports you can define them in your Envyfile
 
-To add custom security groups you can put define them in your Envyfile following the format below: 
+To add custom security groups you can put define them in your Envyfile following the format below:
 
       sec_groups: [
-        'icmp, -1, -1, 0.0.0.0/0', 
+        'icmp, -1, -1, 0.0.0.0/0',
         'tcp, 22, 22, 0.0.0.0/0',
         'tcp, 80, 80, 0.0.0.0/0',
         'tcp, 3000, 3000, 0.0.0.0/0'
