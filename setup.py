@@ -3,16 +3,14 @@ try:
 except:
     from distutils.core import setup
 
-import os
-
 
 def parse_requirements(requirements_filename='requirements.txt'):
     requirements = []
-    if os.path.exists(requirements_filename):
-        with open(requirements_filename) as requirements_file:
-            for requirement in requirements_file:
-                requirements.append(requirement)
+    with open(requirements_filename) as requirements_file:
+        for requirement in requirements_file:
+            requirements.append(requirement.rstrip('\n'))
     return requirements
+
 
 config = dict(
     name='cloudenvy',
