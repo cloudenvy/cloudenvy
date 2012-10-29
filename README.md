@@ -35,7 +35,6 @@ Much like Vagrant, each ENVy must have a corresponding configuration file in the
     project_config:
       name: foo #required
       image: Ubuntu 11.10 cloudimg amd64 #required - you can use either an image name or id - we recommend using image IDs
-      image_id: 47101ccb-2685-42c4-9a32-5aeaaf84862 # use this if there is a chance that there will be more than a single image with the same name.
       remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
       flavor_name: m1.large #optional - defaults to `m1.small`
       provision_scripts:
