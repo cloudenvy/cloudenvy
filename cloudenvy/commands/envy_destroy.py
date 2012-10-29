@@ -1,19 +1,16 @@
 import logging
 
-import fabric.api
-import fabric.operations
-
 from cloudenvy.envy import Envy
 
 
 class EnvyDestroy(object):
-    """Power off and destroy an ENVy"""
+    """Power-off and destroy the current server."""
 
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('ssh', help='ssh help')
+        subparser = subparsers.add_parser('destroy', help='ssh help')
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
@@ -23,11 +20,13 @@ class EnvyDestroy(object):
     def run(self, config, args):
         envy = Envy(config)
 
-        if envy.ip():
-            disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
-                                   ' -o StrictHostKeyChecking=no')
-            fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
-                                                      envy.remote_user,
-                                                      envy.ip()))
+        if envy.find_server():
+            envy.delete_server()
+            logging.info('Deletion for `%s` has been initiated, it should be '
+                         'deleted momentarily.' % envy.name)
+            while envy.find_server():
+                logging.info("... still waiting")
+            logging.info("Done!")
+
         else:
-            logging.error('Could not find IP.')
+            logging.error('There is no environment named %s' % envy.name)
