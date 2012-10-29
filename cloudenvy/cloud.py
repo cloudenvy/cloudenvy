@@ -98,24 +98,16 @@ class CloudAPI(object):
 
     @bad_request
     @not_found
-    def find_image(self, name, id=None):
-        if id:
+    def find_image(self, search_str):
+        try:
+            # find by name
+            image = self.client.images.find(name=search_str)
+        except novaclient.exceptions.NotFound:
             try:
-                image = self.client.images.get(id)
+                # find by id
+                image = self.client.images.get(search_str)
             except novaclient.exceptions.NotFound:
-                logging.error('Image with the id of `%s` Not Found' % id)
-                exit()
-        else:
-            try:
-                image = self.client.images.find(name=name)
-            except novaclient.exceptions.NotFound:
-                logging.error('Image `%s` Not Found' % name)
-                exit()
-            except novaclient.exceptions.NoUniqueMatch:
-                logging.error('There are multiple images named `%s` stored in '
-                              'Glance. To continue you should define '
-                              '`image_id` in your project\'s Envyfile.' % name)
-                exit()
+                raise SystemExit('Image `%s` Not Found' % search_str)
         return image
 
     @bad_request

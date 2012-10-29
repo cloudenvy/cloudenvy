@@ -1,4 +1,5 @@
 import getpass
+import logging
 import os
 import os.path
 import yaml
@@ -48,10 +49,6 @@ class EnvyConfig(object):
             if args.name:
                 config['project_config']['name'] = '%s-%s' % (
                     config['project_config']['name'], args.name)
-        if 'userdata' in args:
-            if args.userdata:
-                config['project_config']['provision_script_path'] = \
-                    args.userdata
 
         #TODO(jakedahn): I think this is stupid, there is probably a better way
         # Updae config dict with which cloud to use.
@@ -63,22 +60,28 @@ class EnvyConfig(object):
             config['cloudenvy'].update(
                 {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
 
-        self._validate_config(config)
+        self._validate_config(config, user_config_path, project_config_path)
 
         return config
 
-    def _validate_config(self, config):
-        for item in ['name', 'flavor_name', 'image_name']:
+    def _validate_config(self, config, user_config_path, project_config_path):
+        if 'image_name' in config['project_config']:
+            logging.warning('Please note that using `image_name` option in your '
+                          'Envyfile has been deprecated. Please use the '
+                          '`image` option instead. `image_name` will no '
+                          'longer be supported as of December 01, 2012.')
+        if 'image_id' in config['project_config']:
+            logging.warning('Please note that using `image_id` option in your '
+                          'Envyfile has been deprecated. Please use the '
+                          '`image` option instead. `image_id` will no '
+                          'longer be supported as of December 01, 2012.')
+
+        for item in ['name']:
             config_item = config['project_config'].get(item)
             if config_item is None:
                 raise SystemExit('Missing Configuration: Make sure `%s` is set'
-                                 ' in your project\'s Envyfile' % item)
+                                 ' in %s' % (item, project_config_path))
 
-        if 'auto_provision' in config['project_config']:
-            config_item = config['project_config'].get('provision_script_path')
-            if config_item is None:
-                raise SystemExit('Missing Configuration: Make sure `%s` is set'
-                                 ' in your project\'s envy file')
         # If credentials config is not set, send output to user.
         for item in ['username', 'password', 'tenant_name', 'auth_url']:
             config_name = 'os_%s' % item
@@ -86,12 +89,14 @@ class EnvyConfig(object):
 
             if config_item is None:
                 raise SystemExit('Missing Credentials: Make sure `%s` is set '
-                                 'in ~/.cloudenvy' % config_name)
+                                 'in %s' % (config_name, user_config_path))
 
     def _check_config_files(self, user_config_path, project_config_path):
         if not os.path.exists(user_config_path):
-            raise SystemExit('Could not read ~/.cloudenvy. Please make sure '
-                             '~/.cloudenvy has the proper configuration.')
+            raise SystemExit('Could not read `%s`. Please make sure '
+                             '~/.cloudenvy has the proper configuration.'
+                             % user_config_path)
         if not os.path.exists(project_config_path):
-            raise SystemExit('Could not read ./Envyfile. Please make sure you'
-                             'have an EnvyFile in your current directory.')
+            raise SystemExit('Could not read `%s`. Please make sure you'
+                             'have an EnvyFile in your current directory.'
+                             % project_config_path)
