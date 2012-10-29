@@ -49,6 +49,10 @@ class EnvyConfig(object):
             if args.name:
                 config['project_config']['name'] = '%s-%s' % (
                     config['project_config']['name'], args.name)
+        if 'keypair_location' in config['cloudenvy']:
+            full_path = os.path.expanduser(
+                                config['cloudenvy']['keypair_location'])
+            config['cloudenvy']['keypair_location'] = full_path
 
         #TODO(jakedahn): I think this is stupid, there is probably a better way
         # Updae config dict with which cloud to use.
