@@ -18,7 +18,7 @@ Use setup.py to install cloudenvy and the dependencies:
 ## Configuration
 
 ### User Config
-You must set your user options in ~/.cloudenvy. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
+You must set your user options in ~/.cloudenvy.yml. User options include a few general preferences, and your cloud credentials. Here is a minimal config:
 
     cloudenvy:
       clouds:
@@ -30,7 +30,7 @@ You must set your user options in ~/.cloudenvy. User options include a few gener
 
 ### Project Config
 
-Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at the root of your project.
+Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at `Envyfile.yml` the root of your project.
 
     project_config:
       name: foo #required

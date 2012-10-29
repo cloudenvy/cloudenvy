@@ -34,8 +34,18 @@ class EnvyConfig(object):
 
     def get_config(self):
         args = self.args
-        user_config_path = os.path.expanduser('~/.cloudenvy')
-        project_config_path = './Envyfile'
+
+        #NOTE(jakedahn): By popular request yml file extension is supported,
+        #                but optional... for now.
+        if os.path.isfile(os.path.expanduser('~/.cloudenvy')):
+            user_config_path = os.path.expanduser('~/.cloudenvy')
+        else:
+            user_config_path = os.path.expanduser('~/.cloudenvy.yml')
+
+        if os.path.isfile('./Envyfile'):
+            project_config_path = './Envyfile'
+        else:
+            project_config_path = './Envyfile.yml'
 
         self._check_config_files(user_config_path, project_config_path)
 
