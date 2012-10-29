@@ -22,7 +22,7 @@ config = dict(
     author='Brian Waldon',
     author_email='bcwaldon@gmail.com',
     install_requires=parse_requirements(),
-    packages=['cloudenvy'],
+    packages=['cloudenvy', 'cloudenvy.commands'],
     entry_points={
         'console_scripts': [
             'envy = cloudenvy.main:main',
