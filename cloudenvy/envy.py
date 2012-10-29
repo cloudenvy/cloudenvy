@@ -51,9 +51,14 @@ class Envy(object):
         return self._server
 
     def ip(self):
-        if not self._ip:
-            self._ip = self.cloud_api.find_ip(self.server().id)
-        return self._ip
+        if self.server():
+            if not self._ip:
+                self._ip = self.cloud_api.find_ip(self.server().id)
+            return self._ip
+        else:
+            raise SystemExit('The ENVy you specified (`%s`) does not exist. '
+                             'Try using the -n flag to specify an ENVy name.'
+                             % self.name)
 
     def build_server(self):
         image_name = self.image_name or self.image_id or self.image
