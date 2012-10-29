@@ -135,7 +135,6 @@ class CloudAPI(object):
     def create_security_group(self, name):
         return self.client.security_groups.create(name, name)
 
-    @bad_request
     def create_security_group_rule(self, security_group, rule):
         return self.client.security_group_rules.create(
             security_group.id, *rule)
