@@ -107,10 +107,10 @@ class EnvyConfig(object):
 
     def _check_config_files(self, user_config_path, project_config_path):
         if not os.path.exists(user_config_path):
-            raise SystemExit('Could not read `%s`. Please make sure '
+            raise SystemExit('Could not read `%s`. Make sure '
                              '~/.cloudenvy has the proper configuration.'
                              % user_config_path)
         if not os.path.exists(project_config_path):
-            raise SystemExit('Could not read `%s`. Please make sure you'
+            raise SystemExit('Could not read `%s`. Make sure you '
                              'have an EnvyFile in your current directory.'
                              % project_config_path)
