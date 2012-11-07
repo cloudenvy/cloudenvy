@@ -38,6 +38,17 @@ def _build_parser():
     EnvyDestroy(subparsers)
     EnvyRun(subparsers)
 
+    def find_command_help(config, args):
+        if args.command:
+            subparsers.choices[args.command].print_help()
+        else:
+            parser.print_help()
+
+    help_subparser = subparsers.add_parser('help',
+            help='Display help information for a specfiic command')
+    help_subparser.add_argument('command', action='store', nargs='?')
+    help_subparser.set_defaults(func=find_command_help)
+
     return parser
 
 
