@@ -54,10 +54,17 @@ class EnvyConfig(object):
         config = dict(CONFIG_DEFAULTS.items() + project_config.items()
                       + user_config.items())
 
-        if 'name' in args:
-            if args.name:
-                config['project_config']['name'] = '%s-%s' % (
-                    config['project_config']['name'], args.name)
+        base_name = config['project_config']['name']
+        try:
+            envy_name = args.name
+            assert envy_name
+        except (AssertionError, KeyError):
+            pass
+        else:
+            config['project_config']['name'] = '%s-%s' % (base_name, envy_name)
+        finally:
+            config['project_config']['base_name'] = base_name
+
         if 'keypair_location' in config['cloudenvy']:
             full_path = os.path.expanduser(
                                 config['cloudenvy']['keypair_location'])
