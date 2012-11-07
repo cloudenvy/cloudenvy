@@ -57,14 +57,11 @@ class EnvyProvision(object):
                             path = script
                             filename = os.path.basename(script)
                             remote_path = '~/%s' % filename
-                            fabric.operations.run('if [ -e "$HOME/%s" ]; '
-                                                  'then rm ~/%s; fi' %
-                                                  (filename, filename))
                             fabric.operations.put(path, remote_path, mode=0755)
                             fabric.operations.run(remote_path)
                             break
                         except fabric.exceptions.NetworkError:
-                            logging.error('Unable to upload the provision script '
+                            logging.debug('Unable to upload the provision script '
                                           'from `%s`. Your ENVy is probably still '
                                           'booting. Trying again in 10 seconds.')
                             time.sleep(10)
