@@ -26,21 +26,25 @@ You must set your user options in ~/.cloudenvy.yml. User options include a few g
           os_username: username
           os_password: password
           os_tenant_name: tenant_name
-          os_auth_url: http://urltokeystoneendpoint:5000/v2.0/
+          os_auth_url: http://keystone.example.com:5000/v2.0/
+
+          # Optional
+          #os_region_name: RegionOne
 
 ### Project Config
 
 Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at `Envyfile.yml` the root of your project.
 
     project_config:
-      name: foo #required
-      image: Ubuntu 11.10 cloudimg amd64 #required - you can use either an image name or id - we recommend using image IDs
-      remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
-      flavor_name: m1.large #optional - defaults to `m1.small`
+      name: foo
+      image: Ubuntu 12.04 cloudimg amd64
+
+      # Optional
+      #remote_user: ubuntu
+      #flavor_name: m1.small
+      #auto_provision: False
       provision_scripts:
-        - ~/Desktop/provision_scripts/foo.sh
-        - ~/Desktop/provision_scripts/bar.sh
-        - ~/Desktop/provision_scripts/baz.sh
+        #- provision_script.sh
 
 NOTE: For the `image` property you can use either an image name or an id. If you use a development cloud where ids change frequently its probably better to use the image name, in all other cases we recommend you use an image id... but it is your call.
 

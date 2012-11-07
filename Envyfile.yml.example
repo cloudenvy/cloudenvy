@@ -1,7 +1,10 @@
 project_config:
-  name: foo #required
-  image: Ubuntu 11.10 cloudimg amd64 #required
-  remote_user: ubuntu #optional - defaults to ubuntu, different distros require different fields, we optimize for ubuntu
-  flavor_name: m1.large #optional - defaults to `m1.small`
-  provision_script_path: './provision_script.sh' #optional - defaults to None
-  auto_provision: True #optional - defaults to False, and requires the presence of the `provision_script_path` setting
+  name: foo
+  image: Ubuntu 12.04 cloudimg amd64
+
+  # Optional
+  #remote_user: ubuntu
+  #flavor_name: m1.small
+  #auto_provision: False
+  provision_scripts:
+    #- provision_script.sh
