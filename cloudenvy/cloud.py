@@ -27,9 +27,10 @@ def bad_request(func):
     def wrapped(*args, **kwargs):
         try:
             return func(*args, **kwargs)
-        except novaclient.exceptions.BadRequest:
+        except novaclient.exceptions.BadRequest as xcpt:
             logging.error("Unable to communicate with endpoints: "
-                          "Received 400/Bad Request from OpenStack.")
+                          "Received 400/Bad Request from OpenStack: " +
+                          str(xcpt))
             exit()
     return wrapped
 
@@ -47,7 +48,8 @@ class CloudAPI(object):
         self.tenant_name = self.user_config['cloud'].get('os_tenant_name',
                                                          None)
         self.auth_url = self.user_config['cloud'].get('os_auth_url', None)
-
+        self.region_name = self.user_config['cloud'].get('os_region_name', None)
+        
     @property
     def client(self):
         if not self._client:
@@ -57,7 +59,8 @@ class CloudAPI(object):
                 self.password,
                 self.tenant_name,
                 self.auth_url,
-                no_cache=True)
+                no_cache=True,
+                region_name=self.region_name)
         return self._client
 
     @bad_request

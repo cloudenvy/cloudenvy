@@ -64,7 +64,11 @@ class Envy(object):
         image_name = self.image_name or self.image_id or self.image
         logging.info("Using image: %s" % image_name)
         image = self.cloud_api.find_image(image_name)
+        if not image:
+            raise SystemExit('The image %s does not exist.' % image_name)
         flavor = self.cloud_api.find_flavor(self.flavor_name)
+        if not flavor:
+            raise SystemExit('The flavor %s does not exist.' % self.flavor_name)
         build_kwargs = {
             'name': self.name,
             'image': image,
