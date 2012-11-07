@@ -58,7 +58,7 @@ class EnvyConfig(object):
         try:
             envy_name = args.name
             assert envy_name
-        except (AssertionError, KeyError):
+        except (AssertionError, AttributeError):
             pass
         else:
             config['project_config']['name'] = '%s-%s' % (base_name, envy_name)
