@@ -14,7 +14,7 @@ def parse_requirements(requirements_filename='requirements.txt'):
 
 config = dict(
     name='cloudenvy',
-    version='0.2.0',
+    version='0.2.1',
     url='https://github.com/cloudenvy/cloudenvy',
     description='Fast provisioning on openstack clouds.',
     author='Brian Waldon',
