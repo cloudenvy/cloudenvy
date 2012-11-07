@@ -10,6 +10,7 @@ from cloudenvy import exceptions
 class Envy(object):
     def __init__(self, config):
         self.name = config['project_config'].get('name')
+        self.base_name = config['project_config'].get('base_name')
         self.config = config
         self.user_config = config['cloudenvy']
         self.project_config = config['project_config']
@@ -30,8 +31,7 @@ class Envy(object):
                                                      self.default_config[
                                                      'keypair_location'])
         self.sec_group_name = self.project_config.get('sec_group_name',
-                                                      self.default_config[
-                                                      'sec_group_name'])
+                                                      self.base_name)
         self._server = None
         self._ip = None
 
