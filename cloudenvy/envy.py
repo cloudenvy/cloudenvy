@@ -30,8 +30,7 @@ class Envy(object):
                                                      self.default_config[
                                                      'keypair_location'])
         self.sec_group_name = self.project_config.get('sec_group_name',
-                                                      self.default_config[
-                                                      'sec_group_name'])
+                                                      self.name)
         self._server = None
         self._ip = None
 

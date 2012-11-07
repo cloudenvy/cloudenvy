@@ -9,7 +9,6 @@ CONFIG_DEFAULTS = {
         'keypair_name': getpass.getuser(),
         'keypair_location': os.path.expanduser('~/.ssh/id_rsa.pub'),
         'flavor_name': 'm1.small',
-        'sec_group_name': 'cloudenvy',
         'remote_user': 'ubuntu',
         'auto_provision': False,
         'dotfiles': '.vimrc, .gitconfig, .gitignore, .screenrc',
