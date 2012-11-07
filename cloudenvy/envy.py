@@ -20,16 +20,16 @@ class Envy(object):
         self.image_name = self.project_config.get('image_name')
         self.image_id = self.project_config.get('image_id', None)
         self.image = self.project_config.get('image')
-        self.flavor_name = self.project_config.get('flavor_name')
-        self.remote_user = self.project_config.get('remote_user')
+        self.flavor_name = self.project_config.get(
+                'flavor_name', self.default_config['flavor_name'])
+        self.remote_user = self.project_config.get(
+                'remote_user', self.default_config['remote_user'])
         self.auto_provision = self.project_config.get('auto_provision', False)
 
-        self.keypair_name = self.user_config.get('keypair_name',
-                                                 self.default_config[
-                                                 'keypair_name'])
-        self.keypair_location = self.user_config.get('keypair_location',
-                                                     self.default_config[
-                                                     'keypair_location'])
+        self.keypair_name = self.user_config.get(
+                'keypair_name', self.default_config['keypair_name'])
+        self.keypair_location = self.user_config.get(
+                'keypair_location', self.default_config['keypair_location'])
         self.sec_group_name = self.project_config.get('sec_group_name',
                                                       self.base_name)
         self._server = None
