@@ -9,20 +9,21 @@ from cloudenvy.envy import Envy
 
 
 class EnvyProvision(object):
-    """Run a provision script to setup your ENVy"""
 
     def __init__(self, argparser=None):
         if argparser:
             self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('provision', help='provision help')
+        help_str = 'Uplaod and execute script(s) in your ENVy.'
+        subparser = subparsers.add_parser('provision', help=help_str,
+                                          description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='specify custom name for an ENVy')
-        subparser.add_argument('-s', '--scripts', default=None, nargs='*',
-                               help='specify one or more provision scripts')
+                               help='Specify custom name for an ENVy.')
+        subparser.add_argument('-s', '--scripts', nargs='*', metavar='PATH',
+                               help='Specify one or more scripts.')
         return subparser
 
     def run(self, config, args):

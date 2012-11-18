@@ -10,17 +10,17 @@ from cloudenvy.envy import Envy
 
 
 class EnvyDotfiles(object):
-    """Upload user dotfiles from your local machine to an ENVy"""
 
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('dotfiles', help='dotfiles help')
+        help_str = 'Upload dotfiles from your local machine to an ENVy.'
+        subparser = subparsers.add_parser('dotfiles', help=help_str,
+                                          description=help_str)
         subparser.set_defaults(func=self.run)
-
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='specify custom name for an ENVy')
+                               help='Specify custom name for an ENVy.')
         subparser.add_argument('-f', '--files', action='store',
                                help='define which dotfiles to upload '
                                     '(comma space separated)')

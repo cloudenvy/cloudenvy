@@ -7,17 +7,18 @@ from cloudenvy.envy import Envy
 
 
 class EnvySSH(object):
-    """SSH into an ENVy"""
 
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('ssh', help='ssh help')
+        help_str = 'SSH into your ENVy.'
+        subparser = subparsers.add_parser('ssh', help=help_str,
+                                          description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='specify custom name for an ENVy')
+                               help='Specify custom name for an ENVy.')
         return subparser
 
     def run(self, config, args):
