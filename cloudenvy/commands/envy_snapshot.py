@@ -16,9 +16,6 @@ class EnvySnapshot(object):
 
         return subparser
 
-    #TODO(jakedahn): The entire UX for this needs to be talked about, refer to
-    #                https://github.com/bcwaldon/cloudenvy/issues/27 for any
-    #                discussion, if you're curious.
     def run(self, config, args):
         envy = Envy(config)
         envy.snapshot('%s-snapshot' % envy.name)
