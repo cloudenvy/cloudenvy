@@ -49,7 +49,7 @@ class CloudAPI(object):
                                                          None)
         self.auth_url = self.user_config['cloud'].get('os_auth_url', None)
         self.region_name = self.user_config['cloud'].get('os_region_name', None)
-        
+
     @property
     def client(self):
         if not self._client:
@@ -79,7 +79,11 @@ class CloudAPI(object):
 
     @bad_request
     def create_server(self, *args, **kwargs):
-        return self.client.servers.create(*args, **kwargs)
+        try:
+            server = self.client.servers.create(*args, **kwargs)
+        except novaclient.exceptions.OverLimit, e:
+            raise SystemExit(logging.error(e))
+        return server
 
     @bad_request
     def find_free_ip(self):
