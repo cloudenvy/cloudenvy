@@ -48,7 +48,8 @@ class CloudAPI(object):
         self.tenant_name = self.user_config['cloud'].get('os_tenant_name',
                                                          None)
         self.auth_url = self.user_config['cloud'].get('os_auth_url', None)
-        self.region_name = self.user_config['cloud'].get('os_region_name', None)
+        self.region_name = self.user_config['cloud'].get('os_region_name',
+                                                         None)
 
     @property
     def client(self):
@@ -148,7 +149,11 @@ class CloudAPI(object):
 
     @bad_request
     def allocate_floating_ip(self):
-        return self.client.floating_ips.create()
+        try:
+            fip = self.client.floating_ips.create()
+        except novaclient.exceptions.OverLimit, e:
+            raise SystemExit(logging.error(e))
+        return fip
 
     @bad_request
     @not_found
