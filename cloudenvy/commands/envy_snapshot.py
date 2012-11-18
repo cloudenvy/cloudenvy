@@ -11,6 +11,9 @@ class EnvySnapshot(object):
         subparser = subparsers.add_parser('snapshot', help='snapshot help')
         subparser.set_defaults(func=self.run)
 
+        subparser.add_argument('-n', '--name', action='store', default='',
+                               help='Specify custom name for an ENVy.')
+
         return subparser
 
     #TODO(jakedahn): The entire UX for this needs to be talked about, refer to
