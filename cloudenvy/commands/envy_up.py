@@ -27,17 +27,16 @@ class EnvyUp(object):
         envy = Envy(config)
 
         if not envy.server():
-            logging.info('Building environment.')
+            logging.info('Triggering ENVy boot.')
             try:
                 envy.build_server()
             except exceptions.ImageNotFound:
                 logging.error('Could not find image.')
                 return
             except exceptions.NoIPsAvailable:
-                logging.error('Could not find free IP.')
+                logging.error('Could not find available IP.')
                 return
-        if not args.no_provision and 'provision_scripts' in \
-                                     envy.project_config:
+        if not args.no_provision and 'provision_scripts' in envy.project_config:
             try:
                 EnvyProvision().run(config, args)
             except SystemExit:
@@ -49,4 +48,4 @@ class EnvyUp(object):
         if envy.ip():
             print envy.ip()
         else:
-            print 'Environment has no IP.'
+            logging.error('Could not determine IP.')

@@ -50,4 +50,4 @@ class EnvyDotfiles(object):
                 fabric.operations.put(temp_tar, '~/dotfiles.tar')
                 fabric.operations.run('tar -xvf ~/dotfiles.tar')
         else:
-            logging.error('Could not find IP to upload file to.')
+            logging.error('Could not determine IP.')

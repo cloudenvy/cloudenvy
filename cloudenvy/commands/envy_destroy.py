@@ -22,11 +22,10 @@ class EnvyDestroy(object):
 
         if envy.find_server():
             envy.delete_server()
-            logging.info('Deletion for `%s` has been initiated, it should be '
-                         'deleted momentarily.' % envy.name)
+            logging.info('Deletion of ENVy \'%s\' was triggered.' % envy.name)
             while envy.find_server():
                 logging.info("... still waiting")
             logging.info("Done!")
 
         else:
-            logging.error('There is no environment named %s' % envy.name)
+            logging.error('Could not find ENVy named \'%s\'.' % envy.name)
