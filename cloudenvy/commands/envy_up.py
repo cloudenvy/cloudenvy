@@ -6,21 +6,23 @@ from cloudenvy.envy import Envy
 
 
 class EnvyUp(object):
-    """Create a cloud ENVy (development environment in the cloud!)"""
 
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('up', help='up help')
+        help_str = 'Create and optionally provision an ENVy.'
+        subparser = subparsers.add_parser('up', help=help_str,
+                                          description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='specify custom name for an ENVy')
+                               help='Specify custom name for an ENVy.')
         subparser.add_argument('-s', '--scripts', default=None, nargs='*',
-                               help='specify one or more provision scripts')
+                               help='Override provision_script_paths option '
+                                    'in project config.')
         subparser.add_argument('--no-provision', action='store_true',
-                               help='prevents provision scripts from running')
+                               help='Prevent provision scripts from running.')
         return subparser
 
     def run(self, config, args):

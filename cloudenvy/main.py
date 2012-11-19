@@ -19,12 +19,12 @@ from cloudenvy.commands.envy_run import EnvyRun
 
 def _build_parser():
     parser = argparse.ArgumentParser(
-        description='Launch a virtual machine in an openstack environment.')
+        description='Launch a virtual machine on an OpenStack cloud.')
     parser.add_argument('-v', '--verbosity', action='count',
-                        help='increase output verbosity')
+                        help='Increase output verbosity.')
     parser.add_argument('-c', '--cloud', action='store',
-                        help='specify which cloud to use')
-    subparsers = parser.add_subparsers(title='Available commands:')
+                        help='Specify which cloud to use.')
+    subparsers = parser.add_subparsers(title='Available commands')
 
     # Load up all of the subparser classes
     EnvyUp(subparsers)
@@ -45,8 +45,9 @@ def _build_parser():
             parser.print_help()
 
     help_subparser = subparsers.add_parser('help',
-            help='Display help information for a specfiic command')
-    help_subparser.add_argument('command', action='store', nargs='?')
+            help='Display help information for a specfiic command.')
+    help_subparser.add_argument('command', action='store', nargs='?',
+            help='Specific command to describe.')
     help_subparser.set_defaults(func=find_command_help)
 
     return parser

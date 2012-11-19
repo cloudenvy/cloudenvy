@@ -2,13 +2,14 @@ from cloudenvy.envy import Envy
 
 
 class EnvySnapshot(object):
-    """Create a snapshot of an ENVy."""
 
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
     def _build_subparser(self, subparsers):
-        subparser = subparsers.add_parser('snapshot', help='snapshot help')
+        help_str = 'Snapshot your ENVy.'
+        subparser = subparsers.add_parser('snapshot', help=help_str,
+                                          description=help_str)
         subparser.set_defaults(func=self.run)
 
         return subparser
