@@ -16,8 +16,11 @@ class EnvySCP(object):
         subparser = subparsers.add_parser('scp', help='scp help')
         subparser.set_defaults(func=self.run)
 
-        subparser.add_argument('source')
-        subparser.add_argument('target')
+        subparser.add_argument('source',
+                help='Local path to copy into your ENVy.')
+        subparser.add_argument('target',
+                help='Location in your ENVy to place file(s). Non-absolute '
+                     'paths are interpreted relative to remote_user homedir.')
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='specify custom name for an ENVy')
         return subparser
