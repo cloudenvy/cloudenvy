@@ -2,6 +2,7 @@
 import functools
 import exceptions
 import logging
+import uuid
 
 import novaclient.exceptions
 import novaclient.client
@@ -109,15 +110,20 @@ class CloudAPI(object):
     @not_found
     def find_image(self, search_str):
         try:
-            # find by name
-            image = self.client.images.find(name=search_str)
+            return self.client.images.find(name=search_str)
         except novaclient.exceptions.NotFound:
-            try:
-                # find by id
-                image = self.client.images.get(search_str)
-            except novaclient.exceptions.NotFound:
-                raise SystemExit('Image `%s` Not Found' % search_str)
-        return image
+            pass
+
+        try:
+            #NOTE(bcwaldon): We can't guarantee all images use UUID4 for their
+            # image ID format, but this is the only way to get around issue
+            # 69 (https://github.com/cloudenvy/cloudenvy/issues/69) for now.
+            # Novaclient should really block us from requesting an image by
+            # ID that's actually a human-readable name (with spaces in it).
+            uuid.UUID(search_str)
+            return self.client.images.get(search_str)
+        except (ValueError, novaclient.exceptions.NotFound):
+            raise SystemExit('Image `%s` could not be found.' % search_str)
 
     @bad_request
     @not_found
