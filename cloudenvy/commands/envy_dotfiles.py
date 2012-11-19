@@ -22,8 +22,8 @@ class EnvyDotfiles(object):
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='Specify custom name for an ENVy.')
         subparser.add_argument('-f', '--files', action='store',
-                               help='define which dotfiles to upload '
-                                    '(comma space separated)')
+                               help='Limit operation to a specific list of '
+                                    'comma-separated files.')
         return subparser
 
     def run(self, config, args):
@@ -36,9 +36,11 @@ class EnvyDotfiles(object):
 
             with fabric.api.settings(host_string=host_string):
                 if args.files:
-                    dotfiles = args.files.split(', ')
+                    dotfiles = args.files.split(',')
                 else:
-                    dotfiles = config['defaults']['dotfiles'].split(', ')
+                    dotfiles = config['defaults']['dotfiles'].split(',')
+
+                dotfiles = [dotfile.strip() for dotfile in dotfiles]
 
                 with tarfile.open(temp_tar.name, 'w') as archive:
                     for dotfile in dotfiles:
@@ -50,4 +52,4 @@ class EnvyDotfiles(object):
                 fabric.operations.put(temp_tar, '~/dotfiles.tar')
                 fabric.operations.run('tar -xvf ~/dotfiles.tar')
         else:
-            logging.error('Could not find IP to upload file to.')
+            logging.error('Could not determine IP.')

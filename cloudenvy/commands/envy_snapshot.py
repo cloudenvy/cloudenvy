@@ -12,11 +12,11 @@ class EnvySnapshot(object):
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
+        subparser.add_argument('-n', '--name', action='store', default='',
+                               help='Specify custom name for an ENVy.')
+
         return subparser
 
-    #TODO(jakedahn): The entire UX for this needs to be talked about, refer to
-    #                https://github.com/bcwaldon/cloudenvy/issues/27 for any
-    #                discussion, if you're curious.
     def run(self, config, args):
         envy = Envy(config)
         envy.snapshot('%s-snapshot' % envy.name)

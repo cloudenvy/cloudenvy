@@ -16,14 +16,9 @@ class EnvyList(object):
 
         return subparser
 
-    #TODO(jakedahn): The way this works is just silly. This should be totally
-    #                refactored to use nova's server metadata attributes.
     def run(self, config, args):
         envy = Envy(config)
-        envys = []
-        servers = envy.list_servers()
 
-        for server in servers:
-            if len(server.name.split(envy.name)) > 1:
-                envys.append(str(server.name))
-        print "ENVys for your project: %s" % str(envys)
+        for server in envy.list_servers():
+            if server.name.startswith(envy.name):
+                print server.name

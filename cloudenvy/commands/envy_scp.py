@@ -35,4 +35,4 @@ class EnvySCP(object):
             with fabric.api.settings(host_string=host_string):
                 fabric.operations.put(args.source, args.target)
         else:
-            logging.error('Could not find IP to upload file to.')
+            logging.error('Could not determine IP.')

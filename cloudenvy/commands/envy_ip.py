@@ -22,8 +22,8 @@ class EnvyIP(object):
         envy = Envy(config)
 
         if not envy.server():
-            logging.error('ENVy is not running. Try running `envy up` first?')
+            logging.error('ENVy is not running.')
         elif envy.ip():
             print envy.ip()
         else:
-            logging.error('Could not find IP.')
+            logging.error('Could not determine IP.')

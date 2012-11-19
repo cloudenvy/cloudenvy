@@ -31,4 +31,4 @@ class EnvySSH(object):
                                                       envy.remote_user,
                                                       envy.ip()))
         else:
-            logging.error('Could not find IP.')
+            logging.error('Could not determine IP.')

@@ -30,5 +30,4 @@ class EnvyRun(object):
             with fabric.api.settings(host_string=host_string):
                 fabric.operations.run(args.command)
         else:
-            logging.error('Unable to run command on ENVy, perhaps its not '
-                          'booted yet?.')
+            logging.error('Could not determine IP.')

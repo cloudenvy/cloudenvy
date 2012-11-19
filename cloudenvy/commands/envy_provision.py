@@ -29,7 +29,7 @@ class EnvyProvision(object):
     def run(self, config, args):
         envy = Envy(config)
 
-        logging.info('Running provision scripts for the `%s` ENVy...' %
+        logging.info('Running provision scripts for ENVy \'%s\'.' %
                      envy.project_config['name'])
         if envy.ip():
             with fabric.api.settings(host_string=envy.ip(), user=envy.remote_user,
@@ -48,10 +48,10 @@ class EnvyProvision(object):
                     raise SystemExit('Please specify the path to your provision '
                                      'script(s) by either using the `--scripts` '
                                      'flag, or by defining the `provision_scripts`'
-                                     ' config option in your Envyfile')
+                                     ' config option in your Envyfile.')
 
                 for script in scripts:
-                    logging.info('Running provision script from: %s', script)
+                    logging.info('Running provision script from \'%s\'', script)
 
                     for i in range(24):
                         try:
@@ -66,7 +66,6 @@ class EnvyProvision(object):
                                           'from `%s`. Your ENVy is probably still '
                                           'booting. Trying again in 10 seconds.' % path)
                             time.sleep(10)
-                    logging.info('The provision script from `%s` has finished '
-                                 'running.' % path)
+                    logging.info('Provision script \'%s\' finished.' % path)
         else:
-            logging.error('Could not find IP.')
+            logging.error('Could not determine IP.')
