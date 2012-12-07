@@ -2,6 +2,7 @@ import logging
 
 import fabric.api
 import fabric.operations
+import os
 
 from cloudenvy.envy import Envy
 
@@ -17,9 +18,9 @@ class EnvySCP(object):
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
-        subparser.add_argument('source',
+        subparser.add_argument('source', nargs='?', default=os.getcwd(),
                 help='Local path to copy into your ENVy.')
-        subparser.add_argument('target',
+        subparser.add_argument('target', nargs='?', default='~/',
                 help='Location in your ENVy to place file(s). Non-absolute '
                      'paths are interpreted relative to remote_user homedir.')
         subparser.add_argument('-n', '--name', action='store', default='',
@@ -33,6 +34,6 @@ class EnvySCP(object):
             host_string = '%s@%s' % (envy.remote_user, envy.ip())
 
             with fabric.api.settings(host_string=host_string):
-                fabric.operations.put(args.source, args.target)
+                fabric.operations.put(args.source, args.target, mirror_local_mode=True)
         else:
             logging.error('Could not determine IP.')
