@@ -25,15 +25,30 @@ class Envy(object):
         self.remote_user = self.project_config.get(
                 'remote_user', self.default_config['remote_user'])
         self.auto_provision = self.project_config.get('auto_provision', False)
-
-        self.keypair_name = self.user_config.get(
-                'keypair_name', self.default_config['keypair_name'])
-        self.keypair_location = self.user_config.get(
-                'keypair_location', self.default_config['keypair_location'])
         self.sec_group_name = self.project_config.get('sec_group_name',
                                                       self.base_name)
+
+        self.keypair_name = self._get_config('keypair_name')
+        self.keypair_location = self._get_config('keypair_location')
+        self.forward_agent = self._get_config('forward_agent')
         self._server = None
         self._ip = None
+
+    def _get_config(self, name, default=None):
+        """Traverse the various config files in order of specificity.
+
+        The order is as follows, most important (specific) to least:
+            Project
+            Cloud
+            User
+            Default
+        """
+        value = self.project_config.get(name,
+                    self.user_config['cloud'].get(name,
+                        self.user_config.get(name,
+                            self.default_config.get(name,
+                                default))))
+        return value
 
     def list_servers(self):
         return self.cloud_api.list_servers()
