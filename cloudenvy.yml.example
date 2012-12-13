@@ -1,3 +1,4 @@
+# This file belongs at ~/.cloudenvy.yml
 cloudenvy:
   clouds:
     cloud01:
@@ -8,3 +9,7 @@ cloudenvy:
 
       # Optional
       #os_region_name: RegionOne
+
+  #Optional
+  #keypair_name: your_keypair_name
+  #keypair_location: /path/to/your/public/key
