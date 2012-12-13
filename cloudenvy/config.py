@@ -11,6 +11,7 @@ CONFIG_DEFAULTS = {
         'flavor_name': 'm1.small',
         'remote_user': 'ubuntu',
         'auto_provision': False,
+        'forward_agent': True,
         'dotfiles': '.vimrc, .gitconfig, .gitignore, .screenrc',
         'sec_groups': [
             'icmp, -1, -1, 0.0.0.0/0',

@@ -13,3 +13,4 @@ cloudenvy:
   #Optional
   #keypair_name: your_keypair_name
   #keypair_location: /path/to/your/public/key
+  #forward_agent: true

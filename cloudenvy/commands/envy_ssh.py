@@ -7,7 +7,6 @@ from cloudenvy.envy import Envy
 
 
 class EnvySSH(object):
-
     def __init__(self, argparser):
         self._build_subparser(argparser)
 
@@ -27,7 +26,13 @@ class EnvySSH(object):
         if envy.ip():
             disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'
                                    ' -o StrictHostKeyChecking=no')
-            fabric.operations.local('ssh %s %s@%s' % (disable_known_hosts,
+            forward_agent = '-o ForwardAgent=yes'
+
+            options = [disable_known_hosts]
+            if envy.forward_agent:
+                options.append(forward_agent)
+
+            fabric.operations.local('ssh %s %s@%s' % (' '.join(options),
                                                       envy.remote_user,
                                                       envy.ip()))
         else:
