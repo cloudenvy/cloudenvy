@@ -142,7 +142,7 @@ class Envy(object):
             if i % 5:
                 logging.info('...waiting for assigned ip')
             if i == 59:
-                raise exceptions.FloatingIPAssignFailur()
+                raise exceptions.FloatingIPAssignFailure()
         logging.info('...done.')
 
     def _ensure_sec_group_exists(self, name):
