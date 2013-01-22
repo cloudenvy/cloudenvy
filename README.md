@@ -60,7 +60,26 @@ NOTE: If your Envyfile contains the `provision_scripts` config option, envy up w
 
     envy up --no-provision
 
+NOTE: If your Envyfile contains the `files` config option, envy will automatically run `envy files` when your ENVy has finished booting, before `envy provision` is run. If you do not want to automatically put your files on the new instance, you must pass the `--no-files` flag:
+
+    envy up --no-files
+
 NOTE: Use the ```-v``` flag to get verbose logging output. Example: ```envy -v up```
+
+### Files
+
+Files can be placed onto the new instance. The files work with a ``files`` hash in your Envyfile.
+
+    #...
+    files:
+      README.md: '~'
+
+The key of the hash is the local path relative to your Envyfile, or absolute, and the value is the remote location. Files and directories are accepted, according to the same restrictions as Fabric's put directive.
+
+To invoke the file uploads directly you can run:
+
+    envy files
+
 
 ### Provision
 
