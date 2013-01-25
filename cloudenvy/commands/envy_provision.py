@@ -63,8 +63,7 @@ class EnvyProvision(object):
                             break
                         except fabric.exceptions.NetworkError:
                             logging.debug('Unable to upload the provision script '
-                                          'from `%s`. Your ENVy is probably still '
-                                          'booting. Trying again in 10 seconds.' % path)
+                                          'from `%s`. Trying again in 10 seconds.' % path)
                             time.sleep(10)
                     logging.info('Provision script \'%s\' finished.' % path)
         else:

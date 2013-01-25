@@ -1,8 +1,8 @@
 import logging
 
 from cloudenvy import exceptions
-from cloudenvy.commands.envy_provision import EnvyProvision
 from cloudenvy.commands.envy_files import EnvyFiles
+from cloudenvy.commands.envy_provision import EnvyProvision
 from cloudenvy.envy import Envy
 
 
@@ -41,7 +41,7 @@ class EnvyUp(object):
             except exceptions.NoIPsAvailable:
                 logging.error('Could not find available IP.')
                 return
-        if not args.no_files and 'files' in envy.project_config:
+        if not args.no_files:
             EnvyFiles().run(config, args)
         if not args.no_provision and 'provision_scripts' in envy.project_config:
             try:

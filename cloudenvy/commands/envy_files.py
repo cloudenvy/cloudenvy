@@ -28,31 +28,30 @@ class EnvyFiles(object):
     def run(self, config, args):
         envy = Envy(config)
 
-        if 'files' in envy.project_config:
-            if envy.ip():
-                host_string = '%s@%s' % (envy.remote_user, envy.ip())
+        if envy.ip():
+            host_string = '%s@%s' % (envy.remote_user, envy.ip())
 
-                with fabric.api.settings(host_string=host_string):
-                    file_list = [(os.path.expanduser(filename), location) for
-                                 filename, location in
-                                 envy.project_config['files'].iteritems()]
+            with fabric.api.settings(host_string=host_string):
+                file_list = [(os.path.expanduser(filename), location) for
+                             filename, location in
+                             envy.project_config.get('files', {}).iteritems()]
 
-                    for filename, endlocation in file_list:
-                        logging.info("Putting file from '%s' to '%s'",
-                                     filename, endlocation)
+                for filename, endlocation in file_list:
+                    logging.info("Putting file from '%s' to '%s'",
+                                 filename, endlocation)
 
-                        for i in range(24):
-                            try:
-                                fabric.operations.put(filename, endlocation,
-                                                      mirror_local_mode=True,
-                                                      use_sudo=True)
-                                break
-                            except fabric.exceptions.NetworkError:
-                                logging.debug('Unable to upload the file ' \
-                                              'from `%s`. Your ENVy is ' \
-                                              'probably still booting. Trying '\
-                                              'again in 10 seconds.' % filename)
-                                time.sleep(10)
+                    for i in range(24):
+                        try:
+                            fabric.operations.put(filename, endlocation,
+                                                  mirror_local_mode=True,
+                                                  use_sudo=True)
+                            break
+                        except fabric.exceptions.NetworkError:
+                            logging.debug('Unable to upload the file ' \
+                                          'from `%s`. Your ENVy is ' \
+                                          'probably still booting. Trying '\
+                                          'again in 10 seconds.' % filename)
+                            time.sleep(10)
 
-            else:
-                logging.error('Could not determine IP.')
+        else:
+            logging.error('Could not determine IP.')
