@@ -1,6 +1,7 @@
 import logging
 
 from cloudenvy import exceptions
+from cloudenvy.commands.envy_files import EnvyFiles
 from cloudenvy.commands.envy_provision import EnvyProvision
 from cloudenvy.envy import Envy
 
@@ -21,6 +22,8 @@ class EnvyUp(object):
         subparser.add_argument('-s', '--scripts', default=None, nargs='*',
                                help='Override provision_script_paths option '
                                     'in project config.')
+        subparser.add_argument('--no-files', action='store_true',
+                               help='Prevent files from being uploaded')
         subparser.add_argument('--no-provision', action='store_true',
                                help='Prevent provision scripts from running.')
         return subparser
@@ -38,6 +41,8 @@ class EnvyUp(object):
             except exceptions.NoIPsAvailable:
                 logging.error('Could not find available IP.')
                 return
+        if not args.no_files:
+            EnvyFiles().run(config, args)
         if not args.no_provision and 'provision_scripts' in envy.project_config:
             try:
                 EnvyProvision().run(config, args)
