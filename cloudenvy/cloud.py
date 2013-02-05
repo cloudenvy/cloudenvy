@@ -1,7 +1,8 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-import functools
 import exceptions
+import functools
 import logging
+import time
 import uuid
 
 import novaclient.exceptions
@@ -33,6 +34,30 @@ def bad_request(func):
                           "Received 400/Bad Request from OpenStack: " +
                           str(xcpt))
             exit()
+    return wrapped
+
+
+def retry_on_overlimit(func):
+    @functools.wraps(func)
+    def wrapped(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except novaclient.exceptions.OverLimit as exc:
+            retry_time = getattr(exc, 'retry_after', 0)
+            if not retry_time:
+                logging.fatal('Unable to allocate resource: %s' % exc.message)
+                raise SystemExit()
+
+            logging.debug('Request was limited, retrying in %s seconds: %s'
+                          % (retry_time, exc.message))
+            time.sleep(retry_time)
+
+            try:
+                return func(*args, **kwargs)
+            except novaclient.exceptions.OverLimit as exc:
+                logging.fatal('Unable to allocate resource: %s' % exc.message)
+                raise SystemExit()
+
     return wrapped
 
 
@@ -79,13 +104,10 @@ class CloudAPI(object):
     def get_server(self, server_id):
         return self.client.servers.get(server_id)
 
+    @retry_on_overlimit
     @bad_request
     def create_server(self, *args, **kwargs):
-        try:
-            server = self.client.servers.create(*args, **kwargs)
-        except novaclient.exceptions.OverLimit, e:
-            raise SystemExit(logging.error(e))
-        return server
+        return self.client.servers.create(*args, **kwargs)
 
     @bad_request
     def find_free_ip(self):
@@ -102,6 +124,7 @@ class CloudAPI(object):
             if fip.instance_id == server_id:
                 return fip.ip
 
+    @retry_on_overlimit
     @bad_request
     def assign_ip(self, server, ip):
         server.add_floating_ip(ip)
@@ -130,6 +153,7 @@ class CloudAPI(object):
     def get_image(self, image_id):
         return self.client.images.get(image_id)
 
+    @retry_on_overlimit
     @bad_request
     def snapshot(self, server, name):
         return self.client.servers.create_image(server, name)
@@ -144,28 +168,28 @@ class CloudAPI(object):
     def find_security_group(self, name):
         return self.client.security_groups.find(name=name)
 
+    @retry_on_overlimit
     @bad_request
     @not_found
     def create_security_group(self, name):
         return self.client.security_groups.create(name, name)
 
+    @retry_on_overlimit
     def create_security_group_rule(self, security_group, rule):
         return self.client.security_group_rules.create(
             security_group.id, *rule)
 
+    @retry_on_overlimit
     @bad_request
     def allocate_floating_ip(self):
-        try:
-            fip = self.client.floating_ips.create()
-        except novaclient.exceptions.OverLimit, e:
-            raise SystemExit(logging.error(e))
-        return fip
+        return self.client.floating_ips.create()
 
     @bad_request
     @not_found
     def find_keypair(self, name):
         return self.client.keypairs.find(name=name)
 
+    @retry_on_overlimit
     @bad_request
     def create_keypair(self, name, key_data):
         return self.client.keypairs.create(name, public_key=key_data)
