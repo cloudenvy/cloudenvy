@@ -1,6 +1,7 @@
 import getpass
 import logging
 import os
+import sys
 import os.path
 import yaml
 
@@ -75,7 +76,7 @@ class EnvyConfig(object):
             else:
                 logging.error("Cloud %s is not found in your config" % args.cloud)
                 logging.debug("Clouds Found %s" % ", ".join(config['cloudenvy']['clouds'].keys()))
-                raise KeyError
+                sys.exit(1)
         else:
             config['cloudenvy'].update(
                 {'cloud': config['cloudenvy']['clouds'].itervalues().next()})
