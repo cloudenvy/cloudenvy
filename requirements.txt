@@ -2,3 +2,4 @@ fabric>=1.5.0
 python-novaclient
 pyyaml
 python-glanceclient
+requests==0.14.2
