@@ -27,6 +27,17 @@ class EnvyConfig(object):
 
     def __init__(self, args):
         self.args = args
+        self.config = None
+
+    def __getitem__(self, item):
+        if not self.config:
+            self.config = self.get_config()
+        return self.config[item]
+
+    def __setitem__(self, item, value):
+        if not self.config:
+            self.config = self.get_config()
+        self.config[item] = value
 
     def get_config(self):
         args = self.args

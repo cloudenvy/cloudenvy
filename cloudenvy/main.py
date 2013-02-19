@@ -59,7 +59,7 @@ def main():
     parser = _build_parser()
     args = parser.parse_args()
 
-    config = EnvyConfig(args).get_config()
+    config = EnvyConfig(args)
 
     if args.verbosity == 3:
         logging.getLogger().setLevel(logging.DEBUG)
