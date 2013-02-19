@@ -16,6 +16,7 @@ from cloudenvy.commands.envy_files import EnvyFiles
 from cloudenvy.commands.envy_ssh import EnvySSH
 from cloudenvy.commands.envy_destroy import EnvyDestroy
 from cloudenvy.commands.envy_run import EnvyRun
+from cloudenvy.commands.envy_init import EnvyInit
 
 
 def _build_parser():
@@ -39,6 +40,7 @@ def _build_parser():
     EnvyDestroy(subparsers)
     EnvyRun(subparsers)
     EnvyFiles(subparsers)
+    EnvyInit(subparsers)
 
     def find_command_help(config, args):
         if args.command:
