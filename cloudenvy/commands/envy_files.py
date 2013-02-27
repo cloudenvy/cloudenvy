@@ -40,18 +40,22 @@ class EnvyFiles(object):
                     logging.info("Putting file from '%s' to '%s'",
                                  filename, endlocation)
 
-                    for i in range(24):
-                        try:
-                            fabric.operations.put(filename, endlocation,
-                                                  mirror_local_mode=True,
-                                                  use_sudo=True)
-                            break
-                        except fabric.exceptions.NetworkError:
-                            logging.debug('Unable to upload the file ' \
-                                          'from `%s`. Your ENVy is ' \
-                                          'probably still booting. Trying '\
-                                          'again in 10 seconds.' % filename)
-                            time.sleep(10)
+                    if os.path.exists(filename):
+                        self._put_file(filename, endlocation)
+                    else:
+                        logging.warning("File '%s' not found.", filename)
 
         else:
             logging.error('Could not determine IP.')
+
+    def _put_file(self, local_path, remote_path):
+        for i in range(24):
+            try:
+                fabric.operations.put(local_path, remote_path,
+                                      mirror_local_mode=True,
+                                      use_sudo=True)
+                break
+            except fabric.exceptions.NetworkError:
+                logging.debug("Unable to upload the file from '%s'. "
+                              "Trying again in 10 seconds." % local_path)
+                time.sleep(10)
