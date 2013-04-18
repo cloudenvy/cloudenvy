@@ -43,7 +43,13 @@ class EnvyConfig(object):
     def _set_working_cloud(self, cloud_name, config):
         """Sets which cloud to operate on based on config values and parameters
         """
-        if cloud_name in config['cloudenvy']['clouds'].keys():
+        try:
+            known_clouds = config['cloudenvy']['clouds'].keys()
+        except (KeyError, AttributeError):
+            logging.error('No clouds defined in config file')
+            sys.exit(1)
+
+        if cloud_name in known_clouds:
             config['cloudenvy'].update(
                 {'cloud': config['cloudenvy']['clouds'][cloud_name]})
         else:
@@ -102,8 +108,13 @@ class EnvyConfig(object):
             self._set_working_cloud(cloud_name, config)
         else:
             # No specific or default, just take whatever is first in the list.
-            cloud_name = config['cloudenvy']['clouds'].keys()[0]
-            self._set_working_cloud(cloud_name, config)
+            try:
+                cloud_name = config['cloudenvy']['clouds'].keys()[0]
+            except (IndexError, KeyError, AttributeError):
+                logging.error('No clouds defined in config file')
+                sys.exit(1)
+            else:
+                self._set_working_cloud(cloud_name, config)
 
         self._validate_config(config, user_config_path, project_config_path)
 
