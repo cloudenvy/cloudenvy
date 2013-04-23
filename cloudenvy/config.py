@@ -144,6 +144,12 @@ class EnvyConfig(object):
             config_item = config['cloudenvy']['cloud'].get(config_name)
 
             if config_item is None:
+                if item == "password":
+                    username = config['cloudenvy']['cloud'].get("os_username")
+                    password = getpass.getpass('Password for account "%s":'
+                                               % (username))
+                    config['cloudenvy']['cloud']['os_password'] = password
+                    continue
                 raise SystemExit('Missing Credentials: Make sure `%s` is set '
                                  'in %s' % (config_name, user_config_path))
 
