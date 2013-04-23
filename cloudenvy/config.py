@@ -132,26 +132,26 @@ class EnvyConfig(object):
                           '`image` option instead. `image_id` will no '
                           'longer be supported as of December 01, 2012.')
 
-        for item in ['name']:
-            config_item = config['project_config'].get(item)
-            if config_item is None:
-                raise SystemExit('Missing Configuration: Make sure `%s` is set'
-                                 ' in %s' % (item, project_config_path))
+        try:
+            config['project_config']['name']
+        except KeyError:
+            raise SystemExit("Ensure 'name' is set in %s"
+                             % project_config_path)
 
-        # If credentials config is not set, send output to user.
-        for item in ['username', 'password', 'tenant_name', 'auth_url']:
-            config_name = 'os_%s' % item
-            config_item = config['cloudenvy']['cloud'].get(config_name)
+        for item in ['os_username', 'os_tenant_name', 'os_auth_url']:
+            try:
+                config['cloudenvy']['cloud'][item]
+            except KeyError:
+                raise SystemExit("Ensure '%s' is set in %s"
+                                 % (item, user_config_path))
 
-            if config_item is None:
-                if item == "password":
-                    username = config['cloudenvy']['cloud'].get("os_username")
-                    password = getpass.getpass('Password for account "%s":'
-                                               % (username))
-                    config['cloudenvy']['cloud']['os_password'] = password
-                    continue
-                raise SystemExit('Missing Credentials: Make sure `%s` is set '
-                                 'in %s' % (config_name, user_config_path))
+        try:
+            password = config['cloudenvy']['cloud']['os_password']
+        except KeyError:
+            username = config['cloudenvy']['cloud']['os_username']
+            prompt = "Password for account '%s': " % username
+            password = getpass.getpass(prompt)
+            config['cloudenvy']['cloud']['os_password'] = password
 
     def _check_config_files(self, user_config_path, project_config_path):
         if not os.path.exists(user_config_path):
