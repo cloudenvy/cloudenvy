@@ -18,4 +18,4 @@ class EnvyList(object):
 
         for server in envy.list_servers():
             if server.name.startswith(envy.name):
-                print server.name
+                print server.name[len(envy.name)+1:] or '(default)'
