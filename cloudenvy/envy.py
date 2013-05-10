@@ -21,9 +21,9 @@ class Envy(object):
         self.image_id = self.project_config.get('image_id', None)
         self.image = self.project_config.get('image')
         self.flavor_name = self.project_config.get(
-                'flavor_name', self.default_config['flavor_name'])
+            'flavor_name', self.default_config['flavor_name'])
         self.remote_user = self.project_config.get(
-                'remote_user', self.default_config['remote_user'])
+            'remote_user', self.default_config['remote_user'])
         self.auto_provision = self.project_config.get('auto_provision', False)
         self.sec_group_name = self.project_config.get('sec_group_name',
                                                       self.base_name)
@@ -43,11 +43,14 @@ class Envy(object):
             User
             Default
         """
-        value = self.project_config.get(name,
-                    self.user_config['cloud'].get(name,
-                        self.user_config.get(name,
-                            self.default_config.get(name,
-                                default))))
+        value = self.project_config.get(
+            name,
+            self.user_config['cloud'].get(
+                name,
+                self.user_config.get(
+                    name,
+                    self.default_config.get(name,
+                                            default))))
         return value
 
     def list_servers(self):
@@ -78,12 +81,17 @@ class Envy(object):
     def build_server(self):
         image_name = self.image_name or self.image_id or self.image
         logging.info("Using image: %s" % image_name)
-        image = self.cloud_api.find_image(image_name)
+        try:
+            image = self.cloud_api.find_image(image_name)
+        except novaclient.exceptions.NoUniqueMatch:
+            raise SystemExit('There are more than one images named %s' %
+                             image_name)
         if not image:
             raise SystemExit('The image %s does not exist.' % image_name)
         flavor = self.cloud_api.find_flavor(self.flavor_name)
         if not flavor:
-            raise SystemExit('The flavor %s does not exist.' % self.flavor_name)
+            raise SystemExit('The flavor %s does not exist.' %
+                             self.flavor_name)
         build_kwargs = {
             'name': self.name,
             'image': image,
