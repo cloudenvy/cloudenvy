@@ -84,8 +84,9 @@ class Envy(object):
         try:
             image = self.cloud_api.find_image(image_name)
         except novaclient.exceptions.NoUniqueMatch:
-            raise SystemExit('There are more than one images named %s' %
-                             image_name)
+            msg = ('There are more than one images named %s. Please specify '
+                   'image id in your config.') % image_name
+            raise SystemExit(msg)
         if not image:
             raise SystemExit('The image %s does not exist.' % image_name)
         flavor = self.cloud_api.find_flavor(self.flavor_name)
