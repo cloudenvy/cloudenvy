@@ -12,6 +12,15 @@ class Destroy(cloudenvy.envy.Command):
         subparser.set_defaults(func=self.run)
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='Specify custom name for an ENVy.')
+
+        #TODO(bcwaldon): design a better method for command aliases
+        help_str = 'Alias for destroy command.'
+        subparser = subparsers.add_parser('down', help=help_str,
+                                          description=help_str)
+        subparser.set_defaults(func=self.run)
+        subparser.add_argument('-n', '--name', action='store', default='',
+                               help='Specify custom name for an ENVy.')
+
         return subparser
 
     def run(self, config, args):
