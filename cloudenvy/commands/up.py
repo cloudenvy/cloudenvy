@@ -1,8 +1,8 @@
 import logging
 
 from cloudenvy import exceptions
-from cloudenvy.commands.envy_files import EnvyFiles
-from cloudenvy.commands.envy_provision import EnvyProvision
+from cloudenvy.commands.files import EnvyFiles
+from cloudenvy.commands.provision import EnvyProvision
 from cloudenvy.envy import Envy
 
 

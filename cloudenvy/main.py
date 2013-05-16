@@ -5,19 +5,19 @@ import logging
 
 from cloudenvy.config import EnvyConfig
 
-from cloudenvy.commands.envy_up import EnvyUp
-from cloudenvy.commands.envy_list import EnvyList
-from cloudenvy.commands.envy_provision import EnvyProvision
-from cloudenvy.commands.envy_snapshot import EnvySnapshot
-from cloudenvy.commands.envy_ip import EnvyIP
-from cloudenvy.commands.envy_scp import EnvySCP
-from cloudenvy.commands.envy_dotfiles import EnvyDotfiles
-from cloudenvy.commands.envy_files import EnvyFiles
-from cloudenvy.commands.envy_ssh import EnvySSH
-from cloudenvy.commands.envy_destroy import EnvyDestroy
-from cloudenvy.commands.envy_down import EnvyDown
-from cloudenvy.commands.envy_run import EnvyRun
-from cloudenvy.commands.envy_init import EnvyInit
+from cloudenvy.commands.up import EnvyUp
+from cloudenvy.commands.list import EnvyList
+from cloudenvy.commands.provision import EnvyProvision
+from cloudenvy.commands.snapshot import EnvySnapshot
+from cloudenvy.commands.ip import EnvyIP
+from cloudenvy.commands.scp import EnvySCP
+from cloudenvy.commands.dotfiles import EnvyDotfiles
+from cloudenvy.commands.files import EnvyFiles
+from cloudenvy.commands.ssh import EnvySSH
+from cloudenvy.commands.destroy import EnvyDestroy
+from cloudenvy.commands.down import EnvyDown
+from cloudenvy.commands.run import EnvyRun
+from cloudenvy.commands.init import EnvyInit
 
 
 def _build_parser():

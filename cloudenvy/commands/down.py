@@ -1,4 +1,4 @@
-from cloudenvy.commands.envy_destroy import EnvyDestroy
+from cloudenvy.commands.destroy import EnvyDestroy
 
 
 class EnvyDown(object):
