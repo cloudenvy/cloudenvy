@@ -1,7 +1,7 @@
 from cloudenvy.envy import Envy
 
 
-class EnvyList(object):
+class List(object):
 
     def __init__(self, argparser):
         self._build_subparser(argparser)

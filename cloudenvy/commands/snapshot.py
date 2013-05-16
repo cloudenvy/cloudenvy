@@ -1,7 +1,7 @@
 from cloudenvy.envy import Envy
 
 
-class EnvySnapshot(object):
+class Snapshot(object):
 
     def __init__(self, argparser):
         self._build_subparser(argparser)

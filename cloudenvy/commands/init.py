@@ -22,7 +22,7 @@ project_file = """project_config:
 """
 
 
-class EnvyInit(object):
+class Init(object):
 
     def __init__(self, argparser):
         self._build_subparser(argparser)

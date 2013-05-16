@@ -8,7 +8,7 @@ import fabric.operations
 from cloudenvy.envy import Envy
 
 
-class EnvyProvision(object):
+class Provision(object):
 
     def __init__(self, argparser=None):
         if argparser:

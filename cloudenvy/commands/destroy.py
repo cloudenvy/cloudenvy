@@ -3,7 +3,7 @@ import logging
 from cloudenvy.envy import Envy
 
 
-class EnvyDestroy(object):
+class Destroy(object):
 
     def __init__(self, argparser):
         self._build_subparser(argparser)

@@ -7,7 +7,7 @@ import os
 from cloudenvy.envy import Envy
 
 
-class EnvySCP(object):
+class Scp(object):
 
     def __init__(self, argparser):
         self._build_subparser(argparser)

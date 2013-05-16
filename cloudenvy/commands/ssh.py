@@ -6,7 +6,7 @@ import fabric.operations
 from cloudenvy.envy import Envy
 
 
-class EnvySSH(object):
+class Ssh(object):
     def __init__(self, argparser):
         self._build_subparser(argparser)
 

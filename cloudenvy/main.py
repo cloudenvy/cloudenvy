@@ -2,22 +2,36 @@
 
 import argparse
 import logging
+import pkgutil
+import string
 
 from cloudenvy.config import EnvyConfig
 
-from cloudenvy.commands.up import EnvyUp
-from cloudenvy.commands.list import EnvyList
-from cloudenvy.commands.provision import EnvyProvision
-from cloudenvy.commands.snapshot import EnvySnapshot
-from cloudenvy.commands.ip import EnvyIP
-from cloudenvy.commands.scp import EnvySCP
-from cloudenvy.commands.dotfiles import EnvyDotfiles
-from cloudenvy.commands.files import EnvyFiles
-from cloudenvy.commands.ssh import EnvySSH
-from cloudenvy.commands.destroy import EnvyDestroy
-from cloudenvy.commands.down import EnvyDown
-from cloudenvy.commands.run import EnvyRun
-from cloudenvy.commands.init import EnvyInit
+import cloudenvy.commands
+
+
+#TODO(bcwaldon): replace this with entry points!
+def _load_commands():
+    """Iterate through modules in command and import suspected command classes
+
+    This looks for a class in each module in cloudenvy.commands that has the
+    same name as its module with the first character uppercased. For example,
+    the cloudenvy.commands.up module should have a class Up within it.
+    """
+    modlist = list(pkgutil.iter_modules(cloudenvy.commands.__path__))
+    #NOTE(bcwaldon): this parses out a string representation of each
+    # individual command module. For example, if we had a single command
+    # in cloudenvy.commands named 'up', this list would look like ['up]
+    commands = [_[1] for _ in modlist]
+    for command in commands:
+        #NOTE(bcwaldon): the __import__ statement returns a handle on the
+        # top-level 'cloudenvy' package, so we must iterate down through
+        # each sub-package to get a handle on our module
+        module_name = 'cloudenvy.commands.{0}'.format(command)
+        _cloudenvy = __import__(module_name, globals(), locals(), [], -1)
+        module = getattr(_cloudenvy.commands, command)
+
+        yield getattr(module, string.capitalize(command))
 
 
 def _build_parser():
@@ -29,20 +43,9 @@ def _build_parser():
                         help='Specify which cloud to use.')
     subparsers = parser.add_subparsers(title='Available commands')
 
-    # Load up all of the subparser classes
-    EnvyUp(subparsers)
-    EnvyList(subparsers)
-    EnvyProvision(subparsers)
-    EnvySnapshot(subparsers)
-    EnvyIP(subparsers)
-    EnvySCP(subparsers)
-    EnvyDotfiles(subparsers)
-    EnvySSH(subparsers)
-    EnvyDestroy(subparsers)
-    EnvyDown(subparsers)
-    EnvyRun(subparsers)
-    EnvyFiles(subparsers)
-    EnvyInit(subparsers)
+    commands = _load_commands()
+    for command in commands:
+        command(subparsers)
 
     def find_command_help(config, args):
         if args.command:
