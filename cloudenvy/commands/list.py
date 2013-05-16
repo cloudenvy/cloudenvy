@@ -1,10 +1,7 @@
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class EnvyList(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class List(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'List all ENVys in your current project.'
@@ -14,7 +11,7 @@ class EnvyList(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         for server in envy.list_servers():
             if server.name.startswith(envy.name):

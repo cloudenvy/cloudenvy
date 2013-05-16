@@ -5,14 +5,10 @@ import os
 import fabric.api
 import fabric.operations
 
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class EnvyFiles(object):
-
-    def __init__(self, argparser=None):
-        if argparser:
-            self._build_subparser(argparser)
+class Files(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Upload arbitrary files from your local machine to an ' \
@@ -26,7 +22,7 @@ class EnvyFiles(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         if envy.ip():
             host_string = '%s@%s' % (envy.remote_user, envy.ip())

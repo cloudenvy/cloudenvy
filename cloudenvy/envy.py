@@ -199,3 +199,16 @@ class Envy(object):
             self.cloud_api.snapshot(self.server(), name)
             logging.info('...done.')
             print name
+
+
+class Command(object):
+
+    def __init__(self, argparser, commands):
+        self.commands = commands
+        self._build_subparser(argparser)
+
+    def _build_subparser(self, subparser):
+        return subparser
+
+    def run(self, config, args):
+        return

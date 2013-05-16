@@ -1,12 +1,9 @@
 import logging
 
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class EnvyIP(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class Ip(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Print IPv4 address of ENVy.'
@@ -19,7 +16,7 @@ class EnvyIP(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         if not envy.server():
             logging.error('ENVy is not running.')

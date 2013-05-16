@@ -1,15 +1,10 @@
 import logging
 
 from cloudenvy import exceptions
-from cloudenvy.commands.envy_files import EnvyFiles
-from cloudenvy.commands.envy_provision import EnvyProvision
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class EnvyUp(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class Up(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Create and optionally provision an ENVy.'
@@ -29,7 +24,7 @@ class EnvyUp(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         if not envy.server():
             logging.info('Triggering ENVy boot.')
@@ -42,12 +37,12 @@ class EnvyUp(object):
                 logging.error('Could not find available IP.')
                 return
         if not args.no_files:
-            EnvyFiles().run(config, args)
+            self.commands['files'].run(config, args)
         if not args.no_provision \
                 and (envy.project_config.get("auto_provision", True) \
                 and 'provision_scripts' in envy.project_config):
             try:
-                EnvyProvision().run(config, args)
+                self.commands['provision'].run(config, args)
             except SystemExit:
                 raise SystemExit('You have not specified any provision '
                                  'scripts in your Envyfile. '

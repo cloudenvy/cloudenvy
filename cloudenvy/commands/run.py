@@ -3,13 +3,10 @@ import logging
 import fabric.api
 import fabric.operations
 
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class EnvyRun(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class Run(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Execute a command in your ENVy.'
@@ -23,7 +20,7 @@ class EnvyRun(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         if envy.ip():
             host_string = '%s@%s' % (envy.remote_user, envy.ip())

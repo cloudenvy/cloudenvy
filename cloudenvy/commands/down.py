@@ -1,11 +1,7 @@
-from cloudenvy.commands.envy_destroy import EnvyDestroy
+import cloudenvy.envy
 
 
-class EnvyDown(object):
-
-    def __init__(self, argparser):
-        self.argparser = argparser
-        self._build_subparser(argparser)
+class Down(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Alias for `envy destroy`'
@@ -15,4 +11,4 @@ class EnvyDown(object):
         return subparser
 
     def run(self, config, args):
-        EnvyDestroy(self.argparser).run(config, args)
+        self.commands['destroy'].run(config, args)
