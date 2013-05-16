@@ -14,7 +14,8 @@ class Up(cloudenvy.envy.Command):
 
         subparser.add_argument('-n', '--name', action='store', default='',
                                help='Specify custom name for an ENVy.')
-        subparser.add_argument('-s', '--scripts', default=None, nargs='*',
+        subparser.add_argument('-s', '--scripts', nargs='*', metavar='PATH',
+                               default=None,
                                help='Override provision_script_paths option '
                                     'in project config.')
         subparser.add_argument('--no-files', action='store_true',
