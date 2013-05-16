@@ -11,7 +11,7 @@ import cloudenvy.envy
 class Provision(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Uplaod and execute script(s) in your ENVy.'
+        help_str = 'Upload and execute script(s) in your ENVy.'
         subparser = subparsers.add_parser('provision', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
