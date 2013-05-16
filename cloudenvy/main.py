@@ -31,7 +31,8 @@ def _load_commands():
         _cloudenvy = __import__(module_name, globals(), locals(), [], -1)
         module = getattr(_cloudenvy.commands, command)
 
-        yield getattr(module, string.capitalize(command))
+        command_class = getattr(module, string.capitalize(command))
+        yield (command, command_class)
 
 
 def _build_parser():
@@ -41,19 +42,18 @@ def _build_parser():
                         help='Increase output verbosity.')
     parser.add_argument('-c', '--cloud', action='store',
                         help='Specify which cloud to use.')
-    subparsers = parser.add_subparsers(title='Available commands')
+    return parser
 
-    commands = _load_commands()
-    for command in commands:
-        command(subparsers)
+
+def _init_help_command(parser):
 
     def find_command_help(config, args):
         if args.command:
-            subparsers.choices[args.command].print_help()
+            parser.choices[args.command].print_help()
         else:
             parser.print_help()
 
-    help_subparser = subparsers.add_parser('help',
+    help_subparser = parser.add_parser('help',
             help='Display help information for a specfiic command.')
     help_subparser.add_argument('command', action='store', nargs='?',
             help='Specific command to describe.')
@@ -62,10 +62,22 @@ def _build_parser():
     return parser
 
 
+def _init_commands(commands, parser):
+    _commands = []
+    for (command, command_class) in commands:
+        _commands.append((command, command_class(parser)))
+    return _commands
+
+
 def main():
     parser = _build_parser()
-    args = parser.parse_args()
+    command_subparser = parser.add_subparsers(title='Available commands')
+    _init_help_command(command_subparser)
 
+    commands = _load_commands()
+    _init_commands(commands, command_subparser)
+
+    args = parser.parse_args()
     config = EnvyConfig(args)
 
     if args.verbosity == 3:
