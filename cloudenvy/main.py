@@ -45,19 +45,19 @@ def _build_parser():
     return parser
 
 
-def _init_help_command(parser):
+def _init_help_command(parser, subparser):
 
     def find_command_help(config, args):
         if args.command:
-            parser.choices[args.command].print_help()
+            subparser.choices[args.command].print_help()
         else:
             parser.print_help()
 
-    help_subparser = parser.add_parser('help',
+    help_cmd = subparser.add_parser('help',
             help='Display help information for a specfiic command.')
-    help_subparser.add_argument('command', action='store', nargs='?',
+    help_cmd.add_argument('command', action='store', nargs='?',
             help='Specific command to describe.')
-    help_subparser.set_defaults(func=find_command_help)
+    help_cmd.set_defaults(func=find_command_help)
 
     return parser
 
@@ -71,7 +71,7 @@ def _init_commands(commands, parser):
 def main():
     parser = _build_parser()
     command_subparser = parser.add_subparsers(title='Available commands')
-    _init_help_command(command_subparser)
+    _init_help_command(parser, command_subparser)
 
     commands = _load_commands()
     _init_commands(commands, command_subparser)
