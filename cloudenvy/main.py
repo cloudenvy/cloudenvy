@@ -63,10 +63,9 @@ def _init_help_command(parser):
 
 
 def _init_commands(commands, parser):
-    _commands = []
+    _commands = {}
     for (command, command_class) in commands:
-        _commands.append((command, command_class(parser)))
-    return _commands
+        _commands[command] = command_class(parser, _commands)
 
 
 def main():

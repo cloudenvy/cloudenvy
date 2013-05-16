@@ -1,10 +1,7 @@
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class Snapshot(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class Snapshot(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Snapshot your ENVy.'
@@ -18,5 +15,5 @@ class Snapshot(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
         envy.snapshot('%s-snapshot' % envy.name)

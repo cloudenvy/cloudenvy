@@ -5,14 +5,10 @@ import time
 import fabric.api
 import fabric.operations
 
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class Provision(object):
-
-    def __init__(self, argparser=None):
-        if argparser:
-            self._build_subparser(argparser)
+class Provision(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Uplaod and execute script(s) in your ENVy.'
@@ -27,7 +23,7 @@ class Provision(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         logging.info('Running provision scripts for ENVy \'%s\'.' %
                      envy.project_config['name'])

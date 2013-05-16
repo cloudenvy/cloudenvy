@@ -1,12 +1,9 @@
 import logging
 
-from cloudenvy.envy import Envy
+import cloudenvy.envy
 
 
-class Destroy(object):
-
-    def __init__(self, argparser):
-        self._build_subparser(argparser)
+class Destroy(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Destroy an ENVy.'
@@ -18,7 +15,7 @@ class Destroy(object):
         return subparser
 
     def run(self, config, args):
-        envy = Envy(config)
+        envy = cloudenvy.envy.Envy(config)
 
         if envy.find_server():
             envy.delete_server()
