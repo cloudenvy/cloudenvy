@@ -91,14 +91,24 @@ class EnvyConfig(object):
             cloud_name = config['cloudenvy']['default_cloud']
             self._set_working_cloud(cloud_name, config)
         else:
-            # No specific or default, just take whatever is first in the list.
             try:
-                cloud_name = config['cloudenvy']['clouds'].keys()[0]
-            except (IndexError, KeyError, AttributeError):
+                num_clouds = len(config['cloudenvy']['clouds'].keys())
+            except (KeyError, TypeError, AttributeError):
+                logging.error('Unable to parse clouds from config file')
+                sys.exit(1)
+
+            if num_clouds == 0:
                 logging.error('No clouds defined in config file')
                 sys.exit(1)
-            else:
-                self._set_working_cloud(cloud_name, config)
+            elif num_clouds > 1:
+                logging.error('Define default_cloud in your cloudenvy config '
+                              'or specify the --cloud flag')
+                sys.exit(1)
+
+            # No explicit cloud defined, but there's only one so we can
+            # safely default to that.
+            cloud_name = config['cloudenvy']['clouds'].keys()[0]
+            self._set_working_cloud(cloud_name, config)
 
         self._validate_config(config, user_config_path, project_config_path)
 
