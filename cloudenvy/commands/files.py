@@ -36,6 +36,9 @@ class Files(cloudenvy.envy.Command):
                     logging.info("Putting file from '%s' to '%s'",
                                  filename, endlocation)
 
+                    path = os.path.dirname(endlocation)
+                    self._create_directory(path)
+
                     if os.path.exists(filename):
                         self._put_file(filename, endlocation)
                     else:
@@ -43,6 +46,16 @@ class Files(cloudenvy.envy.Command):
 
         else:
             logging.error('Could not determine IP.')
+
+    def _create_directory(self, remote_dir):
+        for i in range(24):
+            try:
+                fabric.operations.run('mkdir -p %s' % remote_dir)
+                break
+            except fabric.exceptions.NetworkError:
+                logging.debug("Unable to create directory '%s'. "
+                              "Trying again in 10 seconds." % remote_dir)
+                time.sleep(10)
 
     def _put_file(self, local_path, remote_path):
         for i in range(24):
