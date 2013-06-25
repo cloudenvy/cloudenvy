@@ -28,21 +28,20 @@ class Files(cloudenvy.envy.Command):
             host_string = '%s@%s' % (envy.remote_user, envy.ip())
 
             with fabric.api.settings(host_string=host_string):
-                file_list = [(os.path.expanduser(filename), location) for
-                             filename, location in
-                             envy.project_config.get('files', {}).iteritems()]
+                files = envy.project_config.get('files', {}).items()
+                files = [(os.path.expanduser(loc), rem) for loc, rem in files]
 
-                for filename, endlocation in file_list:
-                    logging.info("Putting file from '%s' to '%s'",
-                                 filename, endlocation)
+                for local_path, remote_path in files:
+                    logging.info("Copying file from '%s' to '%s'",
+                                 local_path, remote_path)
 
-                    path = os.path.dirname(endlocation)
-                    self._create_directory(path)
+                    if os.path.exists(local_path):
+                        logging.error("Local file '%s' not found.", local_path)
 
-                    if os.path.exists(filename):
-                        self._put_file(filename, endlocation)
-                    else:
-                        logging.warning("File '%s' not found.", filename)
+                    dest_dir = _parse_directory(remote_path)
+                    if dest_dir:
+                        self._create_directory(dest_dir)
+                    self._put_file(local_path, remote_path)
 
         else:
             logging.error('Could not determine IP.')
@@ -68,3 +67,15 @@ class Files(cloudenvy.envy.Command):
                 logging.debug("Unable to upload the file from '%s'. "
                               "Trying again in 10 seconds." % local_path)
                 time.sleep(10)
+
+
+def _parse_directory(path):
+    """Given a valid unix path, return the directory
+
+    This will not expand a ~ to a home directory or
+    prepend that home directory to a relative path.
+    """
+    if path is None or '/' not in path:
+        return None
+    else:
+        return os.path.dirname(path)
