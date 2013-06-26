@@ -5,3 +5,4 @@ dist
 *.yml
 Envyfile
 *.pyc
+build/
