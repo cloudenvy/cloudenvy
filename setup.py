@@ -3,6 +3,8 @@ try:
 except:
     from distutils.core import setup
 
+import cloudenvy.metadata
+
 
 def parse_requirements(requirements_filename='requirements.txt'):
     requirements = []
@@ -14,7 +16,7 @@ def parse_requirements(requirements_filename='requirements.txt'):
 
 config = dict(
     name='cloudenvy',
-    version='0.6.0',
+    version=cloudenvy.metadata.VERSION,
     url='https://github.com/cloudenvy/cloudenvy',
     description='Fast provisioning on openstack clouds.',
     author='Brian Waldon',
