@@ -35,7 +35,7 @@ class Files(cloudenvy.envy.Command):
                     logging.info("Copying file from '%s' to '%s'",
                                  local_path, remote_path)
 
-                    if os.path.exists(local_path):
+                    if not os.path.exists(local_path):
                         logging.error("Local file '%s' not found.", local_path)
 
                     dest_dir = _parse_directory(remote_path)
