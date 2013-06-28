@@ -63,9 +63,10 @@ class Files(cloudenvy.envy.Command):
                                       mirror_local_mode=True,
                                       use_sudo=True)
                 break
-            except fabric.exceptions.NetworkError:
-                logging.debug("Unable to upload the file from '%s'. "
-                              "Trying again in 10 seconds." % local_path)
+            except fabric.exceptions.NetworkError as err:
+                logging.debug("Unable to upload the file from '%s': %s. "
+                              "Trying again in 10 seconds." %
+                              (local_path, err))
                 time.sleep(10)
 
 
