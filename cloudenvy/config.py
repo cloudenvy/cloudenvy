@@ -54,8 +54,11 @@ class EnvyConfig(object):
                 {'cloud': config['cloudenvy']['clouds'][cloud_name]})
         else:
             logging.error("Cloud %s is not found in your config" % cloud_name)
-            logging.debug("Clouds Found %s" % ", ".join(
-                          config['cloudenvy']['clouds'].keys()))
+            logging.debug(
+                "Clouds Found %s" % ", ".join(
+                    config['cloudenvy']['clouds'].keys()
+                )
+            )
             sys.exit(1)
 
     def get_config(self):
@@ -125,22 +128,27 @@ class EnvyConfig(object):
 
         if 'keypair_location' in config['cloudenvy']:
             full_path = os.path.expanduser(
-                                config['cloudenvy']['keypair_location'])
+                config['cloudenvy']['keypair_location']
+            )
             config['cloudenvy']['keypair_location'] = full_path
 
         return config
 
     def _validate_config(self, config, user_config_path, project_config_path):
         if 'image_name' in config['project_config']:
-            logging.warning('Please note that using `image_name` option in '
-                          'your Envyfile has been deprecated. Please use the '
-                          '`image` option instead. `image_name` will no '
-                          'longer be supported as of December 01, 2012.')
+            logging.warning(
+                'Please note that using `image_name` option in your Envyfile '
+                'has been deprecated. Please use the `image` option instead. '
+                '`image_name` will no longer be supported as of December 01, '
+                '2012.'
+            )
         if 'image_id' in config['project_config']:
-            logging.warning('Please note that using `image_id` option in your '
-                          'Envyfile has been deprecated. Please use the '
-                          '`image` option instead. `image_id` will no '
-                          'longer be supported as of December 01, 2012.')
+            logging.warning(
+                'Please note that using `image_id` option in your Envyfile '
+                'has been deprecated. Please use the `image` option instead. '
+                '`image_id` will no longer be supported as of December 01, '
+                ' 2012.'
+            )
 
         try:
             config['project_config']['name']

@@ -33,10 +33,14 @@ class Init(cloudenvy.envy.Command):
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
-        subparser.add_argument('-n', '--name', required=True,
-                help='Name of new CloudEnvy project')
-        subparser.add_argument('-i', '--image', required=True,
-                help='Name or ID of image to use for CloudEnvy project')
+        subparser.add_argument(
+            '-n', '--name', required=True,
+            help='Name of new CloudEnvy project'
+        )
+        subparser.add_argument(
+            '-i', '--image', required=True,
+            help='Name or ID of image to use for CloudEnvy project'
+        )
 
         return subparser
 
