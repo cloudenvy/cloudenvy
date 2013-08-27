@@ -12,12 +12,12 @@ import cloudenvy.envy
 class Dotfiles(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Upload dotfiles from your local machine to an ENVy.'
+        help_str = 'Upload dotfiles from your local machine to an Envy.'
         subparser = subparsers.add_parser('dotfiles', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='Specify custom name for an ENVy.')
+                               help='Specify custom name for an Envy.')
         subparser.add_argument('-f', '--files', action='store',
                                help='Limit operation to a specific list of '
                                     'comma-separated files.')

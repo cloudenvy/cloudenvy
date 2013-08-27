@@ -33,7 +33,7 @@ You must set your user options in ~/.cloudenvy.yml. User options include a few g
 
 ### Project Config
 
-Much like Vagrant, each ENVy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at `Envyfile.yml` the root of your project.
+Much like Vagrant, each Envy must have a corresponding configuration file in the project working directory. We call this file Envyfile. It should be located at `Envyfile.yml` the root of your project.
 
     project_config:
       name: foo
@@ -56,11 +56,11 @@ Launch a bare instance
 
     envy up
 
-NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your ENVy has finished booting. If you do not want to auto provision your ENVy you must pass the `--no-provision` flag like so:
+NOTE: If your Envyfile contains the `provision_scripts` config option, envy up will automatically run `envy provision` when your Envy has finished booting. If you do not want to auto provision your Envy you must pass the `--no-provision` flag like so:
 
     envy up --no-provision
 
-NOTE: If your Envyfile contains the `files` config option, envy will automatically run `envy files` when your ENVy has finished booting, before `envy provision` is run. If you do not want to automatically put your files on the new instance, you must pass the `--no-files` flag:
+NOTE: If your Envyfile contains the `files` config option, envy will automatically run `envy files` when your Envy has finished booting, before `envy provision` is run. If you do not want to automatically put your files on the new instance, you must pass the `--no-files` flag:
 
     envy up --no-files
 
@@ -91,14 +91,14 @@ If you are attempting to debug provision scripts, you can pass in several script
 
     envy provision --scripts ~/Desktop/scripts/foo.sh ~/Desktop/scripts/bar.sh
 
-NOTE: Provisioning an ENVy does not use the ```OpenStack CloudConfigDrive```. Instead it uploads the provision script, and runs it using Fabric. This allows you to perform operations which require ssh authentication (such as a git clone from a private repository)
+NOTE: Provisioning an Envy does not use the ```OpenStack CloudConfigDrive```. Instead it uploads the provision script, and runs it using Fabric. This allows you to perform operations which require ssh authentication (such as a git clone from a private repository)
 
 
-### Get your ENVy IP
+### Get your Envy IP
 
     envy ip
 
-### SSH to your ENVy
+### SSH to your Envy
 
 SSH into your instance.
 
@@ -110,11 +110,11 @@ NOTE: It is highly recommended that you enable SSH Agent Forwarding. The fastest
     ssh-add
 
 
-### Run a command on your ENVy
+### Run a command on your Envy
 
     envy run "ls ~/foo"
 
-### Destroy your ENVy
+### Destroy your Envy
 
 Destroy your instance
 
@@ -122,17 +122,17 @@ Destroy your instance
 
 ## Advanced cloudenvy
 
-#### Name your ENVys
+#### Name your Envys
 
-If desired you can launch multiple ENVys for a single project. This is useful if you want to run an ENVy for development, and a separate ENVy for testing. Your ENVy name will always be prefaced for the project it belongs to, to do this run:
+If desired you can launch multiple Envys for a single project. This is useful if you want to run an Envy for development, and a separate Envy for testing. Your Envy name will always be prefaced for the project it belongs to, to do this run:
 
     envy up -n foo #this will result in ProjectName-foo
 
-NOTE: If you choose to do this, you will need to pass the `-n` flag into all of your commands, for example if you want to ssh into the ENVy created above you would have to run:
+NOTE: If you choose to do this, you will need to pass the `-n` flag into all of your commands, for example if you want to ssh into the Envy created above you would have to run:
 
     envy ssh -n foo
 
-You will quickly lose track of all of the ENVys for your project, so we added a command that will allow you to retrieve each ENVy name in context of your proejct. To do this run:
+You will quickly lose track of all of the Envys for your project, so we added a command that will allow you to retrieve each Envy name in context of your proejct. To do this run:
 
     envy list
 
@@ -152,7 +152,7 @@ NOTE: The custom dotfiles must be in a comma separated list, and all of them in 
 
 #### Simple file uploading
 
-You can upload files to your ENVy via SFTP by running:
+You can upload files to your Envy via SFTP by running:
 
     envy scp ~/cat-photo.jpg ~/ZOMGKITTY.jpg
 

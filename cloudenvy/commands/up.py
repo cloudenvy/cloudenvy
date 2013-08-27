@@ -7,13 +7,13 @@ import cloudenvy.envy
 class Up(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Create and optionally provision an ENVy.'
+        help_str = 'Create and optionally provision an Envy.'
         subparser = subparsers.add_parser('up', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='Specify custom name for an ENVy.')
+                               help='Specify custom name for an Envy.')
         subparser.add_argument('-s', '--scripts', nargs='*', metavar='PATH',
                                default=None,
                                help='Override provision_script_paths option '
@@ -28,7 +28,7 @@ class Up(cloudenvy.envy.Command):
         envy = cloudenvy.envy.Envy(config)
 
         if not envy.server():
-            logging.info('Triggering ENVy boot.')
+            logging.info('Triggering Envy boot.')
             try:
                 envy.build_server()
             except exceptions.ImageNotFound:
@@ -47,7 +47,7 @@ class Up(cloudenvy.envy.Command):
             except SystemExit:
                 raise SystemExit('You have not specified any provision '
                                  'scripts in your Envyfile. '
-                                 'If you would like to run your ENVy '
+                                 'If you would like to run your Envy '
                                  'without a provision script; use the '
                                  '`--no-provision` command line flag.')
         if envy.ip():

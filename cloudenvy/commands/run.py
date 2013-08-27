@@ -9,14 +9,14 @@ import cloudenvy.envy
 class Run(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Execute a command in your ENVy.'
+        help_str = 'Execute a command in your Envy.'
         subparser = subparsers.add_parser('run', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('command', help='Command to execute remotely.')
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='Specify custom name for an ENVy.')
+                               help='Specify custom name for an Envy.')
         return subparser
 
     def run(self, config, args):

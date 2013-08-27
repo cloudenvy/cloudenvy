@@ -12,13 +12,13 @@ class Files(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Upload arbitrary files from your local machine to an ' \
-                   'ENVy. Uses the `files` hash in your Envyfile. Mirrors ' \
+                   'Envy. Uses the `files` hash in your Envyfile. Mirrors ' \
                    'the local mode of the file.'
         subparser = subparsers.add_parser('files', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='Specify custom name for an ENVy.')
+                               help='Specify custom name for an Envy.')
         return subparser
 
     def run(self, config, args):

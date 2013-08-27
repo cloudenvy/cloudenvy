@@ -11,13 +11,13 @@ import cloudenvy.envy
 class Provision(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Upload and execute script(s) in your ENVy.'
+        help_str = 'Upload and execute script(s) in your Envy.'
         subparser = subparsers.add_parser('provision', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument('-n', '--name', action='store', default='',
-                               help='Specify custom name for an ENVy.')
+                               help='Specify custom name for an Envy.')
         subparser.add_argument('-s', '--scripts', nargs='*', metavar='PATH',
                                help='Specify one or more scripts.')
         return subparser
@@ -25,7 +25,7 @@ class Provision(cloudenvy.envy.Command):
     def run(self, config, args):
         envy = cloudenvy.envy.Envy(config)
 
-        logging.info('Running provision scripts for ENVy \'%s\'.' %
+        logging.info('Running provision scripts for Envy \'%s\'.' %
                      envy.project_config['name'])
         if not envy.ip():
             logging.error('Could not determine IP.')

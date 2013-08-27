@@ -4,7 +4,7 @@ import cloudenvy.envy
 class List(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'List all ENVys in your current project.'
+        help_str = 'List all Envys in your current project.'
         subparser = subparsers.add_parser('list', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)

@@ -10,23 +10,23 @@ import cloudenvy.envy
 class Scp(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Copy file(s) into your ENVy.'
+        help_str = 'Copy file(s) into your Envy.'
         subparser = subparsers.add_parser('scp', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument(
             'source', nargs='?', default=os.getcwd(),
-            help='Local path to copy into your ENVy.'
+            help='Local path to copy into your Envy.'
         )
         subparser.add_argument(
             'target', nargs='?', default='~/',
-            help='Location in your ENVy to place file(s). Non-absolute '
+            help='Location in your Envy to place file(s). Non-absolute '
             'paths are interpreted relative to remote_user homedir.'
         )
         subparser.add_argument(
             '-n', '--name', action='store', default='',
-            help='Specify custom name for an ENVy.'
+            help='Specify custom name for an Envy.'
         )
         return subparser
 
