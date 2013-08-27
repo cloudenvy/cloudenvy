@@ -178,5 +178,5 @@ class EnvyConfig(object):
                              % user_config_path)
         if not os.path.exists(project_config_path):
             raise SystemExit('Could not read `%s`. Make sure you '
-                             'have an EnvyFile in your current directory.'
+                             'have an Envyfile in your current directory.'
                              % project_config_path)

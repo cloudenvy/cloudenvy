@@ -28,18 +28,18 @@ project_file = """project_config:
 class Init(cloudenvy.envy.Command):
 
     def _build_subparser(self, subparsers):
-        help_str = 'Initialize a new CloudEnvy project.'
+        help_str = 'Initialize a new cloudenvy project.'
         subparser = subparsers.add_parser('init', help=help_str,
                                           description=help_str)
         subparser.set_defaults(func=self.run)
 
         subparser.add_argument(
             '-n', '--name', required=True,
-            help='Name of new CloudEnvy project'
+            help='Name of new cloudenvy project'
         )
         subparser.add_argument(
             '-i', '--image', required=True,
-            help='Name or ID of image to use for CloudEnvy project'
+            help='Name or ID of image to use for cloudenvy project'
         )
 
         return subparser

@@ -1,9 +1,9 @@
-# Cloud Envy
+# cloudenvy
 
-The goal of CloudEnvy is to allow developers to easily spin up instances
+The goal of cloudenvy is to allow developers to easily spin up instances
 for development in an OpenStack cloud.
 
-CloudEnvy is built on a few principles.
+cloudenvy is built on a few principles.
 
     1. Bootstrapping an environment should only take 1 command.
     2. Hardware is the enemy, virtualize your environments so others can play with you.
@@ -120,7 +120,7 @@ Destroy your instance
 
     envy destroy
 
-## Advanced CloudEnvy
+## Advanced cloudenvy
 
 #### Name your ENVys
 
@@ -136,7 +136,7 @@ You will quickly lose track of all of the ENVys for your project, so we added a 
 
     envy list
 
-NOTE: This will likely change, as CloudEnvy gets smarter in how it tracks instances, for example we should probably be using server metadata to track if an instance is from CloudEnvy.
+NOTE: This will likely change, as cloudenvy gets smarter in how it tracks instances, for example we should probably be using server metadata to track if an instance is from cloudenvy.
 
 #### Passing in your user configuration (dotfiles)
 
@@ -158,7 +158,7 @@ You can upload files to your ENVy via SFTP by running:
 
 #### Defining custom security groups
 
-By default CloudEnvy opens ports `22, 443, 80, 8080, 5000, and 9292`. These ports are generally useful for OpenStack development, but if you have other requirements, or just don't like to have empty open ports you can define them in your Envyfile
+By default cloudenvy opens ports `22, 443, 80, 8080, 5000, and 9292`. These ports are generally useful for OpenStack development, but if you have other requirements, or just don't like to have empty open ports you can define them in your Envyfile
 
 To add custom security groups you can put define them in your Envyfile following the format below:
 
