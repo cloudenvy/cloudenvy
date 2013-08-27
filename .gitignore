@@ -1,4 +1,5 @@
 .venv
+.tox/*
 userdata
 cloudenvy.egg-info
 dist

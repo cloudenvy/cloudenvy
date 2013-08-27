@@ -53,10 +53,13 @@ def _init_help_command(parser, subparser):
         else:
             parser.print_help()
 
-    help_cmd = subparser.add_parser('help',
-            help='Display help information for a specfiic command.')
-    help_cmd.add_argument('command', action='store', nargs='?',
-            help='Specific command to describe.')
+    help_cmd = subparser.add_parser(
+        'help', help='Display help information for a specfiic command.'
+    )
+    help_cmd.add_argument(
+        'command', action='store', nargs='?',
+        help='Specific command to describe.'
+    )
     help_cmd.set_defaults(func=find_command_help)
 
     return parser

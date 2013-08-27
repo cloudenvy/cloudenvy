@@ -40,8 +40,8 @@ class Up(cloudenvy.envy.Command):
         if not args.no_files:
             self.commands['files'].run(config, args)
         if not args.no_provision \
-                and (envy.project_config.get("auto_provision", True) \
-                and 'provision_scripts' in envy.project_config):
+                and (envy.project_config.get("auto_provision", True)
+                     and 'provision_scripts' in envy.project_config):
             try:
                 self.commands['provision'].run(config, args)
             except SystemExit:
