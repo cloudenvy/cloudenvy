@@ -66,6 +66,8 @@ NOTE: If your Envyfile contains the `files` config option, envy will automatical
 
 NOTE: Use the ```-v``` flag to get verbose logging output. Example: ```envy -v up```
 
+NOTE: CloudEnvy sets certain metadata (such as `os_auth_url`) on the instance at launch time to make privisioning and other post-launch tasks more developer-friendly.
+
 ### Files
 
 Files can be placed onto the new instance. The files work with a ``files`` hash in your Envyfile.
@@ -168,3 +170,39 @@ To add custom security groups you can put define them in your Envyfile following
         'tcp, 80, 80, 0.0.0.0/0',
         'tcp, 3000, 3000, 0.0.0.0/0'
       ]
+
+#### Useful patterns for provision scripts
+
+There are a number of common parameters that need to be configured on a per-instance basis during provisioning, many of which aren't obviously available. However, much of this data can be obtained from the cloud metadata service (a concept originated by Amazon's EC2 and extended by OpenStack). The metadata service is a RESTful web service which lives at a known IP address (169.254.169.254) which is routable from each instance in the cloud.
+
+Here are some commonly needed pieces of data and the corresponding bash code to get them from the core metadata service:
+
+Instance UUID:
+
+    curl http://169.254.169.254/openstack/latest/meta_data.json | python -c 'import sys, json; print json.load(sys.stdin)["uuid"]'
+
+Instance Name:
+
+    curl http://169.254.169.254/openstack/latest/meta_data.json | python -c 'import sys, json; print json.load(sys.stdin)["name"]'
+
+Fixed IP:
+
+    curl http://169.254.169.254/latest/meta-data/local-ipv4
+
+Floating IP:
+
+    curl http://169.254.169.254/latest/meta-data/public-ipv4
+
+The user-defined server metadata is also available via an OpenStack extension to the metadata service which returns a JSON blob:
+
+OpenStack Auth URL (added to server metadata by CloudEnvy):
+
+    curl http://169.254.169.254/openstack/latest/meta_data.json | python -c 'import sys, json; print json.load(sys.stdin)["meta"]["os_auth_url"]'
+
+Arbitrary Instance Metadata Values (be sure to specify the key you want):
+
+    curl http://169.254.169.254/openstack/latest/meta_data.json | python -c 'import sys, json; print json.load(sys.stdin)["meta"][sys.argv[1]]' <your key here>
+
+Name of first public key:
+
+    curl http://169.254.169.254/openstack/latest/meta_data.json | python -c 'import sys, json; print json.load(sys.stdin)["public_keys"].keys()[0]'
