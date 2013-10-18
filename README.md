@@ -80,6 +80,14 @@ To invoke the file uploads directly you can run:
 
     envy files
 
+If your remote machine doesn't have sudo installed, and since cloudenvy uses sudo
+when pushing files to your remote machine, you can optionnaly turn the use of
+sudo off by using `files_use_sudo: False`. 
+
+    #...
+    files_use_sudo: False
+    files:
+      README.md: '~'
 
 ### Provision
 

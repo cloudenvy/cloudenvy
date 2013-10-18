@@ -28,6 +28,7 @@ class Files(cloudenvy.envy.Command):
             host_string = '%s@%s' % (envy.remote_user, envy.ip())
 
             with fabric.api.settings(host_string=host_string):
+                use_sudo = envy.project_config.get('files_use_sudo', True)
                 files = envy.project_config.get('files', {}).items()
                 files = [(os.path.expanduser(loc), rem) for loc, rem in files]
 
@@ -41,7 +42,7 @@ class Files(cloudenvy.envy.Command):
                     dest_dir = _parse_directory(remote_path)
                     if dest_dir:
                         self._create_directory(dest_dir)
-                    self._put_file(local_path, remote_path)
+                    self._put_file(local_path, remote_path, use_sudo)
 
         else:
             logging.error('Could not determine IP.')
@@ -56,12 +57,12 @@ class Files(cloudenvy.envy.Command):
                               "Trying again in 10 seconds." % remote_dir)
                 time.sleep(10)
 
-    def _put_file(self, local_path, remote_path):
+    def _put_file(self, local_path, remote_path, use_sudo):
         for i in range(24):
             try:
                 fabric.operations.put(local_path, remote_path,
                                       mirror_local_mode=True,
-                                      use_sudo=True)
+                                      use_sudo=use_sudo)
                 break
             except fabric.exceptions.NetworkError as err:
                 logging.debug("Unable to upload the file from '%s': %s. "
