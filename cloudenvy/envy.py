@@ -110,6 +110,11 @@ class Envy(object):
                                         self.keypair_location)
             build_kwargs['key_name'] = self.keypair_name
 
+        build_kwargs['meta'] = {}
+        #TODO(gabrielhurley): Allow user-defined server metadata, see
+        #https://github.com/cloudenvy/cloudenvy/issues/125 for more info.
+        build_kwargs['meta']['os_auth_url'] = self.cloud_api.auth_url
+
         #TODO(jakedahn): Reintroduce this as a 'cloudconfigdrive' config flag.
         # if self.project_config['userdata_path']:
         #     userdata_path = self.project_config['userdata_path']
