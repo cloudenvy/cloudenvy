@@ -124,40 +124,44 @@ class Envy(object):
         logging.info('Creating server...')
         server = self.cloud_api.create_server(**build_kwargs)
 
-        # Wait for server to get fixed ip
-        for i in xrange(600):
-            server = self.cloud_api.get_server(server.id)
-            if len(server.networks):
-                break
-            if i % 5:
-                logging.info('...waiting for fixed ip')
-            if i == 59:
-                raise exceptions.FixedIPAssignFailure()
-            time.sleep(1)
+        server_id = server.id
 
-        logging.info('...done.')
+        def server_ready(server):
+            return server.status == 'ACTIVE'
 
-        logging.info('Assigning a floating ip...')
+        def fixed_ip_ready(server):
+            return len(server.networks) > 0
+
+        def floating_ip_ready(server):
+            return bool(self.cloud_api.find_ip(server.id))
+
+        def wait_for_condition(condition_func, fail_msg):
+            for i in xrange(60):
+                _server = self.cloud_api.get_server(server_id)
+                if condition_func(_server):
+                    return True
+                else:
+                    time.sleep(1)
+            else:
+                raise exceptions.Error(fail_msg)
+
+        #NOTE(bcwaldon): fixed ips are actually assigned before
+        # servers enter ACTIVE state in an OpenStack cloud
+        wait_for_condition(fixed_ip_ready, 'Failed to assign fixed IP')
+
+        wait_for_condition(server_ready, 'Server did not enter ACTIVE state')
+
         try:
-            ip = self.cloud_api.find_free_ip()
+            floating_ip = self.cloud_api.find_free_ip()
         except exceptions.NoIPsAvailable:
-            logging.info('...allocating a new floating ip')
+            logging.info('Allocating a new floating ip to project.')
             self.cloud_api.allocate_floating_ip()
-            ip = self.cloud_api.find_free_ip()
+            floating_ip = self.cloud_api.find_free_ip()
 
-        logging.info('...assigning %s', ip)
-        self.cloud_api.assign_ip(server, ip)
-        for i in xrange(60):
-            logging.info('...finding assigned ip')
-            found_ip = self.cloud_api.find_ip(self.server().id)
-            #server = self.cloud_api.get_server(server.id)
-            if found_ip:
-                break
-            if i % 5:
-                logging.info('...waiting for assigned ip')
-            if i == 59:
-                raise exceptions.FloatingIPAssignFailure()
-        logging.info('...done.')
+        logging.info('Assigning floating ip %s to server.', floating_ip)
+        self.cloud_api.assign_ip(server, floating_ip)
+
+        wait_for_condition(floating_ip_ready, 'Failed to assign floating IP')
 
     def _ensure_sec_group_exists(self, name):
         sec_group = self.cloud_api.find_security_group(name)
