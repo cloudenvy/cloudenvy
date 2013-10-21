@@ -23,7 +23,7 @@ class Run(cloudenvy.core.Command):
         envy = cloudenvy.core.Envy(config)
 
         if envy.ip():
-            host_string = '%s@%s' % (envy.remote_user, envy.ip())
+            host_string = '%s@%s' % (envy.config.remote_user, envy.ip())
             with fabric.api.settings(host_string=host_string):
                 fabric.operations.run(args.command)
         else:

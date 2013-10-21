@@ -25,11 +25,11 @@ class Files(cloudenvy.core.Command):
         envy = cloudenvy.core.Envy(config)
 
         if envy.ip():
-            host_string = '%s@%s' % (envy.remote_user, envy.ip())
+            host_string = '%s@%s' % (envy.config.remote_user, envy.ip())
 
             with fabric.api.settings(host_string=host_string):
-                use_sudo = envy.project_config.get('files_use_sudo', True)
-                files = envy.project_config.get('files', {}).items()
+                use_sudo = envy.config.project_config.get('files_use_sudo', True)
+                files = envy.config.project_config.get('files', {}).items()
                 files = [(os.path.expanduser(loc), rem) for loc, rem in files]
 
                 for local_path, remote_path in files:

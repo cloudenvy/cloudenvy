@@ -9,49 +9,12 @@ from cloudenvy import exceptions
 
 class Envy(object):
     def __init__(self, config):
-        self.name = config['project_config'].get('name')
-        self.base_name = config['project_config'].get('base_name')
         self.config = config
-        self.user_config = config['cloudenvy']
-        self.project_config = config['project_config']
-        self.default_config = config['defaults']
-
         self.cloud_api = openstack.CloudAPI(self.config)
-        self.image_name = self.project_config.get('image_name')
-        self.image_id = self.project_config.get('image_id', None)
-        self.image = self.project_config.get('image')
-        self.flavor_name = self.project_config.get(
-            'flavor_name', self.default_config['flavor_name'])
-        self.remote_user = self.project_config.get(
-            'remote_user', self.default_config['remote_user'])
-        self.auto_provision = self.project_config.get('auto_provision', False)
-        self.sec_group_name = self.project_config.get('sec_group_name',
-                                                      self.base_name)
+        self.name = config.project_config.get('name')
 
-        self.keypair_name = self._get_config('keypair_name')
-        self.keypair_location = self._get_config('keypair_location')
-        self.forward_agent = self._get_config('forward_agent')
         self._server = None
         self._ip = None
-
-    def _get_config(self, name, default=None):
-        """Traverse the various config files in order of specificity.
-
-        The order is as follows, most important (specific) to least:
-            Project
-            Cloud
-            User
-            Default
-        """
-        value = self.project_config.get(
-            name,
-            self.user_config['cloud'].get(
-                name,
-                self.user_config.get(
-                    name,
-                    self.default_config.get(name,
-                                            default))))
-        return value
 
     def list_servers(self):
         return self.cloud_api.list_servers()
@@ -79,36 +42,35 @@ class Envy(object):
                              % self.name)
 
     def build_server(self):
-        image_name = self.image_name or self.image_id or self.image
-        logging.info("Using image: %s" % image_name)
+        logging.info("Using image: %s" % self.config.image)
         try:
-            image = self.cloud_api.find_image(image_name)
+            image = self.cloud_api.find_image(self.config.image)
         except novaclient.exceptions.NoUniqueMatch:
             msg = ('There are more than one images named %s. Please specify '
-                   'image id in your config.') % image_name
-            raise SystemExit(msg)
+                   'image id in your config.')
+            raise SystemExit(msg % self.config.image)
         if not image:
-            raise SystemExit('The image %s does not exist.' % image_name)
-        flavor = self.cloud_api.find_flavor(self.flavor_name)
+            raise SystemExit('The image %s does not exist.' %
+                             self.config.image)
+        flavor = self.cloud_api.find_flavor(self.config.flavor)
         if not flavor:
             raise SystemExit('The flavor %s does not exist.' %
-                             self.flavor_name)
+                             self.config.flavor)
         build_kwargs = {
             'name': self.name,
             'image': image,
             'flavor': flavor,
         }
 
-        # TODO(jakedahn): security group name should be pulled from config.
-        logging.info('Using security group: %s', self.sec_group_name)
-        self._ensure_sec_group_exists(self.sec_group_name)
-        build_kwargs['security_groups'] = [self.sec_group_name]
+        logging.info('Using security group: %s', self.config.sec_group_name)
+        self._ensure_sec_group_exists(self.config.sec_group_name)
+        build_kwargs['security_groups'] = [self.config.sec_group_name]
 
-        if self.keypair_name is not None:
-            logging.info('Using keypair: %s', self.keypair_name)
-            self._ensure_keypair_exists(self.keypair_name,
-                                        self.keypair_location)
-            build_kwargs['key_name'] = self.keypair_name
+        if self.config.keypair_name is not None:
+            logging.info('Using keypair: %s', self.config.keypair_name)
+            self._ensure_keypair_exists(self.config.keypair_name,
+                                        self.config.keypair_location)
+            build_kwargs['key_name'] = self.config.keypair_name
 
         build_kwargs['meta'] = {}
         #TODO(gabrielhurley): Allow user-defined server metadata, see
@@ -172,12 +134,12 @@ class Envy(object):
             except novaclient.exceptions.BadRequest:
                 logging.error('Security Group "%s" already exists.' % name)
 
-        if 'sec_groups' in self.project_config:
+        if 'sec_groups' in self.config.project_config:
             rules = [tuple(rule.split(', ')) for rule in
-                     self.project_config['sec_groups']]
+                     self.config.project_config['sec_groups']]
         else:
             rules = [tuple(rule.split(', ')) for rule in
-                     self.default_config['sec_groups']]
+                     self.config.default_config['sec_groups']]
         for rule in rules:
             logging.debug('... adding rule: %s', rule)
             try:

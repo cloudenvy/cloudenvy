@@ -37,7 +37,7 @@ class Scp(cloudenvy.core.Command):
             logging.error('Could not determine IP.')
             return
 
-        host_string = '%s@%s' % (envy.remote_user, envy.ip())
+        host_string = '%s@%s' % (envy.config.remote_user, envy.ip())
 
         with fabric.api.settings(host_string=host_string):
             fabric.operations.put(

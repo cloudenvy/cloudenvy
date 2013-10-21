@@ -5,7 +5,7 @@ import logging
 import pkgutil
 import string
 
-from cloudenvy.config import EnvyConfig
+from cloudenvy.config import EnvyConfig,Config
 
 import cloudenvy.commands
 
@@ -80,7 +80,8 @@ def main():
     _init_commands(commands, command_subparser)
 
     args = parser.parse_args()
-    config = EnvyConfig(args)
+    config = Config(args)
+    config = EnvyConfig(config)
 
     if args.verbosity == 3:
         logging.getLogger().setLevel(logging.DEBUG)

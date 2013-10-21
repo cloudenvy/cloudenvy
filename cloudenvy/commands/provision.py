@@ -26,23 +26,23 @@ class Provision(cloudenvy.core.Command):
         envy = cloudenvy.core.Envy(config)
 
         logging.info('Running provision scripts for Envy \'%s\'.' %
-                     envy.project_config['name'])
+                     envy.name)
         if not envy.ip():
             logging.error('Could not determine IP.')
             return
 
         with fabric.api.settings(
-                host_string=envy.ip(), user=envy.remote_user,
+                host_string=envy.ip(), user=envy.config.remote_user,
                 forward_agent=True, disable_known_hosts=True):
 
             if args.scripts:
                 scripts = [os.path.expanduser(script) for
                            script in args.scripts]
-            elif 'provision_scripts' in envy.project_config:
+            elif 'provision_scripts' in envy.config.project_config:
                 scripts = [os.path.expanduser(script) for script in
-                           envy.project_config['provision_scripts']]
-            elif 'provision_script_path' in envy.project_config:
-                provision_script = envy.project_config['provision_script_path']
+                           envy.config.project_config['provision_scripts']]
+            elif 'provision_script_path' in envy.config.project_config:
+                provision_script = envy.config.project_config['provision_script_path']
                 scripts = [os.path.expanduser(provision_script)]
             else:
                 raise SystemExit('Please specify the path to your provision '

@@ -65,16 +65,14 @@ class CloudAPI(object):
     def __init__(self, config):
         self._client = None
         self.config = config
-        self.user_config = config['cloudenvy']
-        self.project_config = config['project_config']
 
         # OpenStack Auth Items
-        self.user = self.user_config['cloud'].get('os_username', None)
-        self.password = self.user_config['cloud'].get('os_password', None)
-        self.tenant_name = self.user_config['cloud'].get('os_tenant_name',
+        self.user = self.config.user_config['cloud'].get('os_username', None)
+        self.password = self.config.user_config['cloud'].get('os_password', None)
+        self.tenant_name = self.config.user_config['cloud'].get('os_tenant_name',
                                                          None)
-        self.auth_url = self.user_config['cloud'].get('os_auth_url', None)
-        self.region_name = self.user_config['cloud'].get('os_region_name',
+        self.auth_url = self.config.user_config['cloud'].get('os_auth_url', None)
+        self.region_name = self.config.user_config['cloud'].get('os_region_name',
                                                          None)
 
     @property

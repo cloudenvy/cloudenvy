@@ -27,11 +27,11 @@ class Ssh(cloudenvy.core.Command):
             forward_agent = '-o ForwardAgent=yes'
 
             options = [disable_known_hosts]
-            if envy.forward_agent:
+            if envy.config.forward_agent:
                 options.append(forward_agent)
 
             fabric.operations.local('ssh %s %s@%s' % (' '.join(options),
-                                                      envy.remote_user,
+                                                      envy.config.remote_user,
                                                       envy.ip()))
         else:
             logging.error('Could not determine IP.')

@@ -27,7 +27,7 @@ class Dotfiles(cloudenvy.core.Command):
         envy = cloudenvy.core.Envy(config)
 
         if envy.ip():
-            host_string = '%s@%s' % (envy.remote_user, envy.ip())
+            host_string = '%s@%s' % (envy.config.remote_user, envy.ip())
 
             temp_tar = tempfile.NamedTemporaryFile(delete=True)
 

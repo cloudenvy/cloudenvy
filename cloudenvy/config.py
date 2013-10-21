@@ -24,6 +24,52 @@ CONFIG_DEFAULTS = {
 
 
 class EnvyConfig(object):
+
+    def __init__(self, config):
+        self.base_name = config['project_config'].get('base_name')
+        self.config = config
+        self.user_config = config['cloudenvy']
+        self.project_config = config['project_config']
+        self.default_config = config['defaults']
+
+        image_name = self.project_config.get('image_name')
+        image_id = self.project_config.get('image_id', None)
+        image = self.project_config.get('image')
+        self.image = image_name or image_id or image
+
+        self.flavor = self.project_config.get(
+            'flavor_name', self.default_config['flavor_name'])
+        self.remote_user = self.project_config.get(
+            'remote_user', self.default_config['remote_user'])
+        self.auto_provision = self.project_config.get('auto_provision', False)
+        self.sec_group_name = self.project_config.get('sec_group_name',
+                                                      self.base_name)
+
+        self.keypair_name = self._get_config('keypair_name')
+        self.keypair_location = self._get_config('keypair_location')
+        self.forward_agent = self._get_config('forward_agent')
+
+    def _get_config(self, name, default=None):
+        """Traverse the various config files in order of specificity.
+
+        The order is as follows, most important (specific) to least:
+            Project
+            Cloud
+            User
+            Default
+        """
+        value = self.project_config.get(
+            name,
+            self.user_config['cloud'].get(
+                name,
+                self.user_config.get(
+                    name,
+                    self.default_config.get(name,
+                                            default))))
+        return value
+
+
+class Config(object):
     """Base class for envy commands"""
 
     def __init__(self, args):
