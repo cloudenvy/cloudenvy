@@ -3,7 +3,7 @@ import logging
 import novaclient
 import time
 
-from cloudenvy import cloud
+from cloudenvy.clouds import openstack
 from cloudenvy import exceptions
 
 
@@ -16,7 +16,7 @@ class Envy(object):
         self.project_config = config['project_config']
         self.default_config = config['defaults']
 
-        self.cloud_api = cloud.CloudAPI(self.config)
+        self.cloud_api = openstack.CloudAPI(self.config)
         self.image_name = self.project_config.get('image_name')
         self.image_id = self.project_config.get('image_id', None)
         self.image = self.project_config.get('image')
