@@ -3,10 +3,10 @@ import logging
 import fabric.api
 import fabric.operations
 
-import cloudenvy.envy
+import cloudenvy.core
 
 
-class Ssh(cloudenvy.envy.Command):
+class Ssh(cloudenvy.core.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'SSH into your Envy.'
@@ -19,7 +19,7 @@ class Ssh(cloudenvy.envy.Command):
         return subparser
 
     def run(self, config, args):
-        envy = cloudenvy.envy.Envy(config)
+        envy = cloudenvy.core.Envy(config)
 
         if envy.ip():
             disable_known_hosts = ('-o UserKnownHostsFile=/dev/null'

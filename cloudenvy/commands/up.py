@@ -1,10 +1,10 @@
 import logging
 
 from cloudenvy import exceptions
-import cloudenvy.envy
+import cloudenvy.core
 
 
-class Up(cloudenvy.envy.Command):
+class Up(cloudenvy.core.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Create and optionally provision an Envy.'
@@ -25,7 +25,7 @@ class Up(cloudenvy.envy.Command):
         return subparser
 
     def run(self, config, args):
-        envy = cloudenvy.envy.Envy(config)
+        envy = cloudenvy.core.Envy(config)
 
         if not envy.server():
             logging.info('Triggering Envy boot.')

@@ -1,7 +1,7 @@
 import logging
 import os
 
-import cloudenvy.envy
+import cloudenvy.core
 
 
 project_file = """project_config:
@@ -25,7 +25,7 @@ project_file = """project_config:
 """
 
 
-class Init(cloudenvy.envy.Command):
+class Init(cloudenvy.core.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Initialize a new cloudenvy project.'

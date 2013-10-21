@@ -6,10 +6,10 @@ import os
 import fabric.api
 import fabric.operations
 
-import cloudenvy.envy
+import cloudenvy.core
 
 
-class Dotfiles(cloudenvy.envy.Command):
+class Dotfiles(cloudenvy.core.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Upload dotfiles from your local machine to an Envy.'
@@ -24,7 +24,7 @@ class Dotfiles(cloudenvy.envy.Command):
         return subparser
 
     def run(self, config, args):
-        envy = cloudenvy.envy.Envy(config)
+        envy = cloudenvy.core.Envy(config)
 
         if envy.ip():
             host_string = '%s@%s' % (envy.remote_user, envy.ip())

@@ -4,10 +4,10 @@ import fabric.api
 import fabric.operations
 import os
 
-import cloudenvy.envy
+import cloudenvy.core
 
 
-class Scp(cloudenvy.envy.Command):
+class Scp(cloudenvy.core.Command):
 
     def _build_subparser(self, subparsers):
         help_str = 'Copy file(s) into your Envy.'
@@ -31,7 +31,7 @@ class Scp(cloudenvy.envy.Command):
         return subparser
 
     def run(self, config, args):
-        envy = cloudenvy.envy.Envy(config)
+        envy = cloudenvy.core.Envy(config)
 
         if not envy.ip():
             logging.error('Could not determine IP.')
