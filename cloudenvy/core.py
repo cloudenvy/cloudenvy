@@ -23,7 +23,7 @@ class Envy(object):
         return self.cloud_api.find_server(self.name)
 
     def delete_server(self):
-        self.server().delete()
+        self.cloud_api.delete_server(self.server())
         self._server = None
 
     def server(self):

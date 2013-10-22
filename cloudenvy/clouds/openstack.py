@@ -195,3 +195,6 @@ class CloudAPI(object):
     @bad_request
     def create_keypair(self, name, key_data):
         return self.client.keypairs.create(name, public_key=key_data)
+
+    def delete_server(self, server):
+        server.delete()
