@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 import exceptions
 import functools
+import getpass
 import logging
 import time
 import uuid
@@ -65,6 +66,22 @@ class CloudAPI(object):
     def __init__(self, config):
         self._client = None
         self.config = config
+
+        #NOTE(bcwaldon): This was just dumped here to make room for EC2.
+        # Clean it up!
+        for item in ['os_username', 'os_tenant_name', 'os_auth_url']:
+            try:
+                config.user_config['cloud'][item]
+            except KeyError:
+                raise SystemExit("Ensure '%s' is set in user config" % item)
+
+        try:
+            password = config.user_config['cloud']['os_password']
+        except KeyError:
+            username = config.user_config['cloud']['os_username']
+            prompt = "Password for account '%s': " % username
+            password = getpass.getpass(prompt)
+            config.user_config['cloud']['os_password'] = password
 
         # OpenStack Auth Items
         self.user = self.config.user_config['cloud'].get('os_username', None)

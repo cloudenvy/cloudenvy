@@ -204,21 +204,6 @@ class Config(object):
             raise SystemExit("Ensure 'name' is set in %s"
                              % project_config_path)
 
-        for item in ['os_username', 'os_tenant_name', 'os_auth_url']:
-            try:
-                config['cloudenvy']['cloud'][item]
-            except KeyError:
-                raise SystemExit("Ensure '%s' is set in %s"
-                                 % (item, user_config_path))
-
-        try:
-            password = config['cloudenvy']['cloud']['os_password']
-        except KeyError:
-            username = config['cloudenvy']['cloud']['os_username']
-            prompt = "Password for account '%s': " % username
-            password = getpass.getpass(prompt)
-            config['cloudenvy']['cloud']['os_password'] = password
-
     def _check_config_files(self, user_config_path, project_config_path):
         if not os.path.exists(user_config_path):
             raise SystemExit('Could not read `%s`. Make sure '
