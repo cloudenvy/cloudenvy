@@ -49,7 +49,7 @@ class EnvyConfig(object):
         self.keypair_location = self._get_config('keypair_location')
         self.forward_agent = self._get_config('forward_agent')
 
-        self.cloud_type = 'openstack'
+        self.cloud_type = 'openstack' if 'os_auth_url' in self.user_config['cloud'] else 'ec2'
 
     def _get_config(self, name, default=None):
         """Traverse the various config files in order of specificity.

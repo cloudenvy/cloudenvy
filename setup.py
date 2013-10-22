@@ -28,6 +28,7 @@ config = dict(
             'envy = cloudenvy.main:main',
         ],
         'cloudenvy_cloud_apis': [
+            'ec2 = cloudenvy.clouds.ec2:CloudAPI',
             'openstack = cloudenvy.clouds.openstack:CloudAPI',
         ],
     },
