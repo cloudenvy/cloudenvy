@@ -26,7 +26,10 @@ config = dict(
     entry_points={
         'console_scripts': [
             'envy = cloudenvy.main:main',
-        ]
+        ],
+        'cloudenvy_cloud_apis': [
+            'openstack = cloudenvy.clouds.openstack:CloudAPI',
+        ],
     },
 )
 

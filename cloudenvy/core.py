@@ -3,15 +3,17 @@ import logging
 import novaclient
 import time
 
-from cloudenvy.clouds import openstack
+import cloudenvy.clouds
 from cloudenvy import exceptions
 
 
 class Envy(object):
     def __init__(self, config):
         self.config = config
-        self.cloud_api = openstack.CloudAPI(self.config)
         self.name = config.project_config.get('name')
+
+        cls = cloudenvy.clouds.get_api_cls(self.config.cloud_type)
+        self.cloud_api = cls(config)
 
         self._server = None
         self._ip = None
