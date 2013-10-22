@@ -101,7 +101,7 @@ class Envy(object):
             else:
                 raise exceptions.Error(fail_msg)
 
-        wait_for_condition(server_ready, 'Server did not enter ACTIVE state')
+        wait_for_condition(server_ready, 'Server was not ready in time')
 
         try:
             floating_ip = self.cloud_api.find_free_ip()
@@ -113,7 +113,7 @@ class Envy(object):
         logging.info('Assigning floating ip %s to server.', floating_ip)
         self.cloud_api.assign_ip(server, floating_ip)
 
-        wait_for_condition(network_ready, 'Network was not set up in time')
+        wait_for_condition(network_ready, 'Network was not ready in time')
 
     def _ensure_sec_group_exists(self, name):
         sec_group = self.cloud_api.find_security_group(name)
