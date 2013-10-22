@@ -141,17 +141,17 @@ class CloudAPI(object):
         server = self.get_server(server_id)
 
         try:
-            floating_ip = self.find_free_ip()
+            floating_ip = self._find_free_ip()
         except exceptions.NoIPsAvailable:
             logging.info('Allocating a new floating ip to project.')
-            self.allocate_floating_ip()
-            floating_ip = self.find_free_ip()
+            self._allocate_floating_ip()
+            floating_ip = self._find_free_ip()
 
         logging.info('Assigning floating ip %s to server.', floating_ip)
-        self.assign_ip(server, floating_ip)
+        self._assign_ip(server, floating_ip)
 
     @bad_request
-    def find_free_ip(self):
+    def _find_free_ip(self):
         fips = self.client.floating_ips.list()
         for fip in fips:
             if not fip.instance_id:
@@ -167,7 +167,7 @@ class CloudAPI(object):
 
     @retry_on_overlimit
     @bad_request
-    def assign_ip(self, server, ip):
+    def _assign_ip(self, server, ip):
         server.add_floating_ip(ip)
 
     @bad_request
@@ -221,7 +221,7 @@ class CloudAPI(object):
 
     @retry_on_overlimit
     @bad_request
-    def allocate_floating_ip(self):
+    def _allocate_floating_ip(self):
         return self.client.floating_ips.create()
 
     @bad_request

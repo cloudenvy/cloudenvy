@@ -108,15 +108,9 @@ class CloudAPI(object):
         #NOTE(bcwaldon): We depend on EC2 to do this for us today
         return
 
-    def find_free_ip(self):
-        raise NotImplementedError()
-
     def find_ip(self, server_id):
         instance = self._get_server(server_id)
         return instance.ip_address
-
-    def assign_ip(self, server, ip):
-        raise NotImplementedError()
 
     def _find_image(self, image_id):
         #NOTE(bcwaldon): This only works with image ids for now
@@ -155,9 +149,6 @@ class CloudAPI(object):
             sg.authorize(*rule)
         except boto.exception.EC2ResponseError:
             pass
-
-    def allocate_floating_ip(self):
-        raise NotImplementedError()
 
     def find_keypair(self, name):
         return self.client.get_key_pair(name)
