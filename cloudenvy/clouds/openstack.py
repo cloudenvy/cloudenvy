@@ -146,11 +146,6 @@ class CloudAPI(object):
         except (ValueError, novaclient.exceptions.NotFound):
             raise SystemExit('Image `%s` could not be found.' % search_str)
 
-    @bad_request
-    @not_found
-    def get_image(self, image_id):
-        return self.client.images.get(image_id)
-
     @retry_on_overlimit
     @bad_request
     def snapshot(self, server, name):
