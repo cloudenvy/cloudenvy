@@ -109,6 +109,10 @@ class CloudAPI(object):
         server = self.get_server(server_id)
         return server.status == 'ACTIVE'
 
+    def is_network_active(self, server_id):
+        server = self.get_server(server_id)
+        return len(server.networks) > 0
+
     @bad_request
     def list_servers(self):
         return self.client.servers.list()

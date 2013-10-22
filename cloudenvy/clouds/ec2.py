@@ -51,6 +51,10 @@ class CloudAPI(object):
         inst = self._get_server(server_id)
         return inst.state == 'running'
 
+    def is_network_active(self, server_id):
+        inst = self._get_server(server_id)
+        return bool(inst.ip_address)
+
     def list_servers(self):
         instances = self.client.get_only_instances(filters={'instance-state-name': 'running'})
         return [self._instance_to_dict(inst) for inst in instances]

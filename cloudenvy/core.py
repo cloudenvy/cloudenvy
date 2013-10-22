@@ -88,11 +88,8 @@ class Envy(object):
         def server_ready(server):
             return self.cloud_api.is_server_active(server.id)
 
-        def fixed_ip_ready(server):
-            return len(server.networks) > 0
-
-        def floating_ip_ready(server):
-            return bool(self.cloud_api.find_ip(server.id))
+        def network_ready(server):
+            return self.cloud_api.is_network_active(server.id)
 
         def wait_for_condition(condition_func, fail_msg):
             for i in xrange(60):
@@ -103,10 +100,6 @@ class Envy(object):
                     time.sleep(1)
             else:
                 raise exceptions.Error(fail_msg)
-
-        #NOTE(bcwaldon): fixed ips are actually assigned before
-        # servers enter ACTIVE state in an OpenStack cloud
-        wait_for_condition(fixed_ip_ready, 'Failed to assign fixed IP')
 
         wait_for_condition(server_ready, 'Server did not enter ACTIVE state')
 
@@ -120,7 +113,7 @@ class Envy(object):
         logging.info('Assigning floating ip %s to server.', floating_ip)
         self.cloud_api.assign_ip(server, floating_ip)
 
-        wait_for_condition(floating_ip_ready, 'Failed to assign floating IP')
+        wait_for_condition(network_ready, 'Network was not set up in time')
 
     def _ensure_sec_group_exists(self, name):
         sec_group = self.cloud_api.find_security_group(name)
