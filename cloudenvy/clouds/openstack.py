@@ -122,6 +122,11 @@ class CloudAPI(object):
     @retry_on_overlimit
     @bad_request
     def create_server(self, *args, **kwargs):
+        kwargs.setdefault('meta', {})
+        #TODO(gabrielhurley): Allow user-defined server metadata, see
+        #https://github.com/cloudenvy/cloudenvy/issues/125 for more info.
+        kwargs['meta']['os_auth_url'] = self.auth_url
+
         return self.client.servers.create(*args, **kwargs)
 
     @bad_request
