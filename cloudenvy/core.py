@@ -142,12 +142,9 @@ class Envy(object):
                      self.config.default_config['sec_groups']]
         for rule in rules:
             logging.debug('... adding rule: %s', rule)
-            try:
-                logging.info('Creating Security Group Rule %s' % str(rule))
-                self.cloud_api.create_security_group_rule(sec_group, rule)
-            except novaclient.exceptions.BadRequest:
-                logging.info('Security Group Rule "%s" already exists.' %
-                             str(rule))
+            logging.info('Creating Security Group Rule %s' % str(rule))
+            self.cloud_api.create_security_group_rule(sec_group, rule)
+
         logging.info('...done.')
 
     def _ensure_keypair_exists(self, name, pubkey_location):

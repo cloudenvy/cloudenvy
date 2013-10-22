@@ -174,8 +174,12 @@ class CloudAPI(object):
 
     @retry_on_overlimit
     def create_security_group_rule(self, security_group, rule):
-        return self.client.security_group_rules.create(
-            security_group.id, *rule)
+        try:
+            return self.client.security_group_rules.create(
+                security_group.id, *rule)
+        except novaclient.exceptions.BadRequest:
+            logging.info('Security Group Rule "%s" already exists.' %
+                         str(rule))
 
     @retry_on_overlimit
     @bad_request
