@@ -104,6 +104,9 @@ class CloudAPI(object):
 
         return self._instance_to_dict(instance)
 
+    def setup_network(self, server_id):
+        #NOTE(bcwaldon): We depend on EC2 to do this for us today
+        return
 
     def find_free_ip(self):
         raise NotImplementedError()

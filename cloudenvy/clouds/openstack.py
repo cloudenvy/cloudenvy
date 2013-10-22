@@ -137,6 +137,19 @@ class CloudAPI(object):
 
         return self.client.servers.create(*args, **kwargs)
 
+    def create_network(self, server_id):
+        server = self.get_server(server_id)
+
+        try:
+            floating_ip = self.cloud_api.find_free_ip()
+        except exceptions.NoIPsAvailable:
+            logging.info('Allocating a new floating ip to project.')
+            self.cloud_api.allocate_floating_ip()
+            floating_ip = self.cloud_api.find_free_ip()
+
+        logging.info('Assigning floating ip %s to server.', floating_ip)
+        self.cloud_api.assign_ip(server, floating_ip)
+
     @bad_request
     def find_free_ip(self):
         fips = self.client.floating_ips.list()

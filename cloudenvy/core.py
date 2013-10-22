@@ -103,15 +103,7 @@ class Envy(object):
 
         wait_for_condition(server_ready, 'Server was not ready in time')
 
-        try:
-            floating_ip = self.cloud_api.find_free_ip()
-        except exceptions.NoIPsAvailable:
-            logging.info('Allocating a new floating ip to project.')
-            self.cloud_api.allocate_floating_ip()
-            floating_ip = self.cloud_api.find_free_ip()
-
-        logging.info('Assigning floating ip %s to server.', floating_ip)
-        self.cloud_api.assign_ip(server, floating_ip)
+        self.cloud_api.setup_network(server_id)
 
         wait_for_condition(network_ready, 'Network was not ready in time')
 
