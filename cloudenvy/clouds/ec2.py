@@ -47,6 +47,10 @@ class CloudAPI(object):
     def _image_to_dict(image):
         return Image(id=image.id, name=image.id)
 
+    def is_server_active(self, server_id):
+        inst = self._get_server(server_id)
+        return inst.state == 'running'
+
     def list_servers(self):
         instances = self.client.get_only_instances(filters={'instance-state-name': 'running'})
         return [self._instance_to_dict(inst) for inst in instances]

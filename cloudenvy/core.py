@@ -86,7 +86,7 @@ class Envy(object):
         server_id = server.id
 
         def server_ready(server):
-            return server.status == 'ACTIVE'
+            return self.cloud_api.is_server_active(server.id)
 
         def fixed_ip_ready(server):
             return len(server.networks) > 0

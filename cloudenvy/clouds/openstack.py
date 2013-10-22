@@ -105,6 +105,10 @@ class CloudAPI(object):
                 region_name=self.region_name)
         return self._client
 
+    def is_server_active(self, server_id):
+        server = self.get_server(server_id)
+        return server.status == 'ACTIVE'
+
     @bad_request
     def list_servers(self):
         return self.client.servers.list()
