@@ -137,7 +137,7 @@ class CloudAPI(object):
 
         return self.client.servers.create(*args, **kwargs)
 
-    def create_network(self, server_id):
+    def setup_network(self, server_id):
         server = self.get_server(server_id)
 
         try:
