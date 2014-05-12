@@ -1,5 +1,4 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
-import exceptions
 import functools
 import getpass
 import logging
@@ -9,6 +8,7 @@ import uuid
 import novaclient.exceptions
 import novaclient.client
 
+from cloudenvy import exceptions
 
 def not_found(func):
     @functools.wraps(func)
