@@ -66,7 +66,7 @@ NOTE: If your Envyfile contains the `files` config option, envy will automatical
 
 NOTE: Use the ```-v``` flag to get verbose logging output. Example: ```envy -v up```
 
-NOTE: CloudEnvy sets certain metadata (such as `os_auth_url`) on the instance at launch time to make privisioning and other post-launch tasks more developer-friendly.
+NOTE: CloudEnvy sets certain metadata (such as `os_auth_url`) on the instance at launch time to make provisioning and other post-launch tasks more developer-friendly.
 
 ### Files
 
