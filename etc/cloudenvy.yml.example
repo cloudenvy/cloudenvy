@@ -6,6 +6,7 @@ cloudenvy:
       os_password: password
       os_tenant_name: tenant_name
       os_auth_url: http://keystone.example.com:5000/v2.0/
+      #network_id : 00000000-0000-0000-0000-000000000000
 
       # Optional
       #os_region_name: RegionOne

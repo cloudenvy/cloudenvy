@@ -14,6 +14,7 @@ CONFIG_DEFAULTS = {
         'auto_provision': False,
         'forward_agent': True,
         'default_cloud': None,
+        'network_id': None,
         'dotfiles': '.vimrc, .gitconfig, .gitignore, .screenrc',
         'sec_groups': [
             'icmp, -1, -1, 0.0.0.0/0',
@@ -50,6 +51,7 @@ class EnvyConfig(object):
         self.forward_agent = self._get_config('forward_agent')
 
         self.cloud_type = 'openstack' if 'os_auth_url' in self.user_config['cloud'] else 'ec2'
+        self.network_id = self._get_config('network_id')
 
     def _get_config(self, name, default=None):
         """Traverse the various config files in order of specificity.

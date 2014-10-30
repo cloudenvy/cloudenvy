@@ -6,5 +6,6 @@ project_config:
   #remote_user: ubuntu
   #flavor_name: m1.small
   #auto_provision: False
+  #network_id : 00000000-0000-0000-0000-000000000000
   provision_scripts:
     #- provision_script.sh
