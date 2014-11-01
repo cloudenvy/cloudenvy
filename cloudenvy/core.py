@@ -79,6 +79,9 @@ class Envy(object):
         #     userdata_path = self.project_config['userdata_path']
         #     logging.info('Using userdata from: %s', userdata_path)
         #     build_kwargs['user_data'] = userdata_path
+        if self.config.network_id:
+            logging.info('Adding network-id configuration.')
+            build_kwargs['nics'] = [{'net-id': self.config.network_id,},]
 
         logging.info('Creating server...')
         server = self.cloud_api.create_server(**build_kwargs)
