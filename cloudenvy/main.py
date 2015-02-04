@@ -54,7 +54,7 @@ def _init_help_command(parser, subparser):
             parser.print_help()
 
     help_cmd = subparser.add_parser(
-        'help', help='Display help information for a specfiic command.'
+        'help', help='Display help information for a specific command.'
     )
     help_cmd.add_argument(
         'command', action='store', nargs='?',
